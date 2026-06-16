@@ -183,9 +183,7 @@
         let isReadOnlyGirlfriendView = false;
 
         // Establish direct connection to database client
-        if(SUPABASE_KEY !== "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuZWV3cmR3d2VsYXdkYWZ1cXRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1ODEzNjEsImV4cCI6MjA5NzE1NzM2MX0.mpqxLCBP9ocI0sNUo3PD5QY1Gv7SoVmSBGFnk9PkF3Y") {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        }
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // Evaluate query constraints to verify audience path identity models
         const runtimeURLParams = new URLSearchParams(window.location.search);
