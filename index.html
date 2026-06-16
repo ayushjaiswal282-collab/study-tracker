@@ -183,7 +183,7 @@
         let isReadOnlyGirlfriendView = false;
 
         // Initialize Supabase Client Connection Safeguard
-        if(SUPABASE_URL.indexOf("YOUR_PROJECT_ID") === -1) {
+        {
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         }
 
