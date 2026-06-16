@@ -183,9 +183,7 @@
         let isReadOnlyGirlfriendView = false;
 
         // Initialize Supabase Client Connection Safeguard
-        {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        }
+		supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // Evaluate query constraints to verify audience path identity models
         const runtimeURLParams = new URLSearchParams(window.location.search);
