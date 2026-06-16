@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud-Synced Banking Study Hub</title>
+    <!-- Tailwind CSS for modern layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- html2pdf.js for local PDF exports -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Supabase CDN for Real-Time Cloud Database Synchronization -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-100 font-sans min-h-screen py-8 px-4">
+
+    <!-- View Mode Notification Banner -->
+    <div id="view-mode-banner" class="max-w-4xl mx-auto mb-4 hidden bg-amber-50 border border-amber-200 rounded-xl p-3 text-center text-xs font-bold text-amber-800 shadow-sm">
+        👀 Viewing in Read-Only Mode (Girlfriend View). Live edits are disabled to protect Ayush's active session data.
+    </div>
+
+    <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-100">
+        
+        <!-- Dashboard Control Header -->
+        <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 p-6 md:p-8 text-white">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">BANKING STRATEGY HUB</h1>
+                    <p class="text-indigo-200 text-xs md:text-sm mt-1">CIL MT / SBI PO / IBPS SO IT Officer Dynamic Engine</p>
+                </div>
+                <div class="flex flex-col items-end gap-1">
+                    <span id="sync-badge" class="bg-rose-500/20 text-rose-300 text-xs font-bold px-3 py-1 rounded-full border border-rose-500/30">
+                        Database Disconnected
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Controls Grid Form Layout -->
+            <div id="editor-controls-panel" class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-white/5 p-4 rounded-xl backdrop-blur-md border border-white/10 mb-6">
+                <div>
+                    <label for="startTime" class="block text-[11px] font-bold uppercase tracking-wider text-indigo-300 mb-1.5">Study Start Time</label>
+                    <input type="time" id="startTime" value="08:00" onchange="generateSchedule()" class="w-full bg-white text-slate-900 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none">
+                </div>
+                <div>
+                    <label for="planType" class="block text-[11px] font-bold uppercase tracking-wider text-indigo-300 mb-1.5">Duration of Study</label>
+                    <select id="planType" onchange="generateSchedule()" class="w-full bg-white text-slate-900 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none">
+                        <option value="3">3-Hour Plan (Ultra Focused)</option>
+                        <option value="4">4-Hour Plan (Core Balanced)</option>
+                        <option value="5">5-Hour Plan (Advanced Cover)</option>
+                        <option value="6">6-Hour Plan (Comprehensive)</option>
+                    </select>
+                </div>
+                <div class="flex items-end gap-2">
+                    <button onclick="generateSchedule()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded-lg text-xs transition shadow-md">
+                        🎲 Shuffle
+                    </button>
+                    <button onclick="commitActiveDayToHistory()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3 rounded-lg text-xs transition shadow-md">
+                        💾 Lock Day
+                    </button>
+                </div>
+            </div>
+
+            <!-- Four-Tab Router Links Layout -->
+            <div class="flex flex-wrap border-b border-white/10 gap-1 text-xs md:text-sm">
+                <button onclick="switchTab('schedule-tab')" id="btn-schedule-tab" class="py-2.5 px-3 md:px-4 font-bold border-b-2 border-white text-white focus:outline-none transition">
+                    📅 Daily Schedule
+                </button>
+                <button onclick="switchTab('completed-tab')" id="btn-completed-tab" class="py-2.5 px-3 md:px-4 font-medium text-indigo-200 hover:text-white border-b-2 border-transparent focus:outline-none transition">
+                    ✅ Completed Subject
+                </button>
+                <button onclick="switchTab('progress-tab')" id="btn-progress-tab" class="py-2.5 px-3 md:px-4 font-medium text-indigo-200 hover:text-white border-b-2 border-transparent focus:outline-none transition">
+                    📊 Progress
+                </button>
+                <button onclick="switchTab('history-tab')" id="btn-history-tab" class="py-2.5 px-3 md:px-4 font-medium text-indigo-200 hover:text-white border-b-2 border-transparent focus:outline-none transition">
+                    📆 History Calendar
+                </button>
+            </div>
+        </div>
+
+        <!-- Master Tab Layout Canvas View Wrapper -->
+        <div id="timetable-print-zone" class="p-6 md:p-8 bg-white">
+            
+            <!-- TAB 1: LIVE DAILY TIMETABLE -->
+            <div id="schedule-tab" class="tab-content">
+                <div class="border-b border-slate-200 pb-4 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Customized Study Agenda</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">High-yielding priorities remain systematically locked first; secondary variables rotate.</p>
+                    </div>
+                    <div id="total-timeline-span" class="text-xs md:text-sm font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-lg"></div>
+                </div>
+                <div id="schedule-timeline-flow" class="relative border-l border-slate-200 ml-3 md:ml-36 space-y-6">
+                    <!-- Javascript populates scheduling entries here -->
+                </div>
+            </div>
+
+            <!-- TAB 2: SUBJECT-WISE TARGET STATUS MATRIX CHECKLISTS -->
+            <div id="completed-tab" class="tab-content hidden">
+                <div class="border-b border-slate-200 pb-4 mb-6">
+                    <h2 class="text-xl font-bold text-slate-800">Syllabus Matrix & Milestone Checklists</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Check off chapters upon functional completion. Metrics refresh globally across the interface.</p>
+                </div>
+                <div id="syllabus-accordion-container" class="space-y-6">
+                    <!-- Programmatic subject accordion layouts generated here -->
+                </div>
+            </div>
+
+            <!-- TAB 3: MASTER VELOCITY ANALYTICS -->
+            <div id="progress-tab" class="tab-content hidden">
+                <div class="border-b border-slate-200 pb-4 mb-6">
+                    <h2 class="text-xl font-bold text-slate-800">Live Preparation Velocity Analytics</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Aggregated visual completion distribution across core target themes.</p>
+                </div>
+                <div class="bg-gradient-to-br from-indigo-50 to-slate-50 border border-indigo-100 rounded-2xl p-6 mb-8 flex flex-col sm:flex-row items-center gap-6 shadow-sm">
+                    <div class="relative w-24 h-24 flex items-center justify-center bg-white rounded-full border-4 border-indigo-600 shadow-md">
+                        <span id="overall-percentage-text" class="text-xl font-black text-indigo-950">0%</span>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900 tracking-tight">Overall Mastery Milestone Completion</h3>
+                        <p class="text-xs text-slate-500 mt-1 max-w-md leading-relaxed">Computes total contextual control metrics across foundational, acceleration, and mock mode modules.</p>
+                    </div>
+                </div>
+                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-4">Sectional Progress Metrics</h3>
+                <div id="sectional-progress-container" class="space-y-4">
+                    <!-- Automated layout progress bar elements -->
+                </div>
+            </div>
+
+            <!-- NEW TAB 4: CALENDAR TIMELINE HISTORY SYSTEM WITH PROGRESS GRAPS -->
+            <div id="history-tab" class="tab-content hidden">
+                <div class="border-b border-slate-200 pb-4 mb-6">
+                    <h2 class="text-xl font-bold text-slate-800">Historical Tracking Calendar</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Select a logged calendar day to check past study durations and subject distribution performance charts.</p>
+                </div>
+                const SUPABASE_URL = "https://dneewrdwwelawdafuqti.supabase.co";
+		const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuZWV3cmR3d2VsYXdkYWZ1cXRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1ODEzNjEsImV4cCI6MjA5NzE1NzM2MX0.mpqxLCBP9ocI0sNUo3PD5QY1Gv7SoVmSBGFnk9PkF3Y";
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Mini Left Pane Calendar Day Index Registry Node -->
+                    <div class="bg-slate-50 p-4 border border-slate-200 rounded-xl">
+                        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Logged Days Archive</h3>
+                        <div id="calendar-days-log-list" class="space-y-2 max-h-[350px] overflow-y-auto">
+                            <!-- Injected dates buttons -->
+                            <p class="text-xs text-slate-400 italic">No history records locked yet. Click "Lock Day" at day's end to log metrics.</p>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Right Performance Analytics Workspace Monitor Grid Pane -->
+                    <div class="md:col-span-2 bg-slate-50/50 p-5 border border-slate-200 border-dashed rounded-xl flex flex-col justify-between">
+                        <div id="history-workspace-empty" class="text-center py-12 my-auto">
+                            <span class="text-3xl">📅</span>
+                            <p class="text-xs font-medium text-slate-400 mt-2">Select any date from the log list to inspect historical data records.</p>
+                        </div>
+                        
+                        <div id="history-workspace-active" class="hidden space-y-6 w-full">
+                            <div class="flex justify-between items-center border-b border-slate-200 pb-2">
+                                <h3 id="hist-display-date" class="font-extrabold text-slate-800 text-sm">Date</h3>
+                                <span id="hist-display-hours" class="bg-indigo-100 text-indigo-800 text-xs font-black px-2.5 py-0.5 rounded-md border border-indigo-200">0 Hours Done</span>
+                            </div>
+
+                            <!-- Historical Subject Weight Distributions Progress Vector Bars Area -->
+                            <div>
+                                <h4 class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Subject Performance Map on Day</h4>
+                                <div id="history-graph-bars-stack" class="space-y-2">
+                                    <!-- Injected programmatic graph bars -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // STEP 2 CONFIGURATION: SETUP CLOUD DB PARAMS
+        // ==========================================
+        const SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co"; 
+        const SUPABASE_KEY = "YOUR_ANON_PUBLIC_KEY"; 
+        let supabaseClient = null;
+        let isReadOnlyGirlfriendView = false;
+
+        // Initialize Supabase Client Connection Safeguard
+        if(SUPABASE_URL.indexOf("YOUR_PROJECT_ID") === -1) {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
+
+        // Evaluate query constraints to verify audience path identity models
+        const runtimeURLParams = new URLSearchParams(window.location.search);
+        if(runtimeURLParams.get('view') === 'girlfriend') {
+            isReadOnlyGirlfriendView = true;
+            document.getElementById('view-mode-banner').classList.remove('hidden');
+            document.getElementById('editor-controls-panel').classList.add('hidden');
+        }
+
+        // Core App Routing Controller
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+            document.querySelectorAll('[id^="btn-"]').forEach(btn => {
+                btn.classList.remove('border-white', 'text-white', 'font-bold');
+                btn.classList.add('text-indigo-200', 'font-medium', 'border-transparent');
+            });
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            activeBtn.classList.remove('text-indigo-200', 'border-transparent', 'font-medium');
+            activeBtn.classList.add('border-white', 'text-white', 'font-bold');
+        }
+
+        function formatTimeMarker(totalMinutes) {
+            const adjustedMinutes = totalMinutes % 1440; 
+            const hourField = Math.floor(adjustedMinutes / 60) % 24;
+            const minuteField = adjustedMinutes % 60;
+            return `${hourField % 12 === 0 ? 12 : hourField % 12}:${minuteField < 10 ? '0' + minuteField : minuteField} ${hourField >= 12 ? 'PM' : 'AM'}`;
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        const bankingSyllabusData = {
+            "Quantitative Aptitude": [
+                { id: "qa_si_ci", name: "Simple & Compound Interest (Urgent priority untouched topic)" },
+                { id: "qa_num_sys", name: "Number System, Simplification & Approximations" },
+                { id: "qa_pct", name: "Percentage, Ratio & Proportion structures" },
+                { id: "qa_avg", name: "Averages & Mixtures (Alligation framework)" },
+                { id: "qa_time", name: "Time & Work | Time, Speed & Distance vectors" },
+                { id: "qa_di", name: "Data Interpretation (Tabular, Bar, Line, Pie, Caselets)" },
+                { id: "qa_series", name: "Number Series & Quadratic Equations" },
+                { id: "qa_prob", name: "Probability & Permutation/Combination blocks" },
+                { id: "qa_mensuration", name: "Mensuration formulas (2D & 3D geometries)" },
+                { id: "qa_profit", name: "Profit & Loss, Partnership, Boats & Streams" }
+            ],
+            "Professional Knowledge (IT/CS Core)": [
+                { id: "it_dbms", name: "DBMS: ER Model, Keys, Normalization, SQL syntax queries" },
+                { id: "it_os", name: "Operating Systems: Process, Memory, & Thread Scheduling" },
+                { id: "it_cn", name: "Computer Networks: OSI/TCP-IP Layers, Core Protocol suites" },
+                { id: "it_ds", name: "Data Structures: Arrays, Linked Lists, Stacks, Queues, Trees, Graphs" },
+                { id: "it_se", name: "Software Engineering: SDLC, Quality Testing, Agile methodologies" },
+                { id: "it_coa", name: "Computer Organisation & Architecture: CPU, Caching infrastructure, Pipelining" },
+                { id: "it_oop", name: "OOP Concepts & Algorithm Complexity analytics" },
+                { id: "it_emerging", name: "AI/ML Basics, Cloud Framework Architectures & IoT paradigms" }
+            ],
+            "Reasoning & Puzzles": [
+                { id: "re_syllogism", name: "Syllogism (All contemporary & conceptual new patterns)" },
+                { id: "re_inequality", name: "Inequality & Coded Inequality reasoning patterns" },
+                { id: "re_coding", name: "Coding-Decoding matrices, Direction Sense vectors" },
+                { id: "re_blood", name: "Blood Relations & Coded Family Mapping records" },
+                { id: "re_puzzles_sprint", name: "High-Freq Puzzle Sprint: Floor-based & Scheduling arrays" },
+                { id: "re_seating", name: "Seating Arrangements (Circular, Linear, Box configurations)" },
+                { id: "re_input", name: "Input-Output Machine execution systems" },
+                { id: "re_sufficiency", name: "Data Sufficiency evaluation logic rules" }
+            ],
+            "English Language": [
+                { id: "en_grammar", name: "Grammar Rules Crash Focus (Urgent priority untouched topic)" },
+                { id: "en_error", name: "Error Detection, Extraction & Correction rules" },
+                { id: "en_rc", name: "Reading Comprehension fluency & inference analytics" },
+                { id: "en_jumbles", name: "Para-Jumbles, Para-Completion & Sentence Rearrangements" },
+                { id: "en_vocab", name: "Contextual Vocabulary, Word Usage & Cloze Test procedures" }
+            ],
+            "General Awareness & Banking": [
+                { id: "ga_ca_catchup", name: "Last 3 Months CA Intensive Revision Catch-up" },
+                { id: "ga_rbi", name: "Banking Awareness: RBI structure, NABARD, Circular directives" },
+                { id: "ga_schemes", name: "Key Government Schemes & Budgetary Policy highlights" },
+                { id: "ga_static", name: "Static GK: Vital Appointments, Awards, Rankings" }
+            ],
+            "Computer Knowledge": [
+                { id: "ck_mcqs", name: "30 Maintenance MCQs daily loop tracking profiles" }
+            ]
+        };
+
+        const basicSecondaryPool = [
+            { id: "reasoning", name: "Reasoning & Puzzles Block", tag: "Reasoning", type: "core", desc: "Timed puzzle runs. Target: Floor-based & scheduling configuration drills." },
+            { id: "english", name: "English Language Mastery", tag: "English", type: "core", desc: "First 2 weeks Grammar Rules concentration focus, then Error detection sets." },
+            { id: "gaca", name: "General Awareness & Banking", tag: "GA / CA", type: "core", desc: "AffairsCloud current affairs capsule review + dynamic sectional mock checks." },
+            { id: "computer", name: "Computer Knowledge Maintenance", tag: "Computer", type: "light", desc: "30 speed run structural MCQs pulled via Adda247 quiz databanks." },
+            { id: "mock", name: "Mock Test / Sectional Evaluation", tag: "Evaluation", type: "core", desc: "PracticeMock online system simulations + rigorous mistake analysis analytics." }
+        ];
+
+        // Core Timetable Scheduling Generation Pipeline Matrix
+        function generateSchedule() {
+            const timeRaw = document.getElementById('startTime').value;
+            const hoursSelected = parseInt(document.getElementById('planType').value);
+            if (!timeRaw) return;
+
+            const [hours, minutes] = timeRaw.split(':').map(Number);
+            let currentMinutes = hours * 60 + minutes;
+            const absoluteStart = currentMinutes;
+            let plannedBlocks = [];
+
+            const fixedWarmUp = { dur: 15, tag: "Warm-Up", name: "Morning Warm-up + CA Headlines", type: "light", desc: "AffairsCloud headlines + gentle warm stretching." };
+            const fixedBreakfast = { dur: 30, tag: "Break", name: "Breakfast / Refreshment Break", type: "break", desc: "Complete separation from screens to preserve nervous energy." };
+
+            if (hoursSelected === 3) {
+                plannedBlocks.push(fixedWarmUp, { dur: 60, tag: "QA PEAK", name: "Quantitative Aptitude (SI & CI)", type: "core", desc: "High conversion arithmetic calculation practice drills." }, { dur: 60, tag: "IT PEAK", name: "Professional Knowledge (IT Core)", type: "core", desc: "DBMS/OS conceptual acceleration sets." });
+                let shuffled = shuffleArray([...basicSecondaryPool]); plannedBlocks.push({ ...shuffled[0], dur: 45 });
+            } else if (hoursSelected === 4) {
+                plannedBlocks.push(fixedWarmUp, { dur: 60, tag: "QA PEAK", name: "Quantitative Aptitude (SI & CI)", type: "core", desc: "High intensity arithmetic drills." }, { dur: 60, tag: "IT PEAK", name: "Professional Knowledge (IT Core)", type: "core", desc: "DBMS/OS core technical focus items." }, fixedBreakfast);
+                let shuffled = shuffleArray([...basicSecondaryPool]); plannedBlocks.push({ ...shuffled[0], dur: 45 }, { ...shuffled[1], dur: 40 });
+            } else if (hoursSelected === 5) {
+                plannedBlocks.push(fixedWarmUp, { dur: 75, tag: "QA PEAK", name: "Quantitative Aptitude (SI & CI)", type: "core", desc: "Targeted focus: Simple & Compound Interest tracking bounds." }, { dur: 75, tag: "IT PEAK", name: "Professional Knowledge (IT Core)", type: "core", desc: "Networks & Data Structures practice routines." }, fixedBreakfast);
+                let shuffled = shuffleArray([...basicSecondaryPool]); plannedBlocks.push({ ...shuffled[0], dur: 45 }, { ...shuffled[1], dur: 40 }, { ...shuffled[2], dur: 30 });
+            } else if (hoursSelected === 6) {
+                plannedBlocks.push(fixedWarmUp, { dur: 90, tag: "QA PEAK", name: "Quantitative Aptitude (Core Focus)", type: "core", desc: "30 timed arithmetic questions. Primary priority: Simple & Compound Interest." }, { dur: 90, tag: "IT PEAK", name: "Professional Knowledge (IT Officer)", type: "core", desc: "Core computer architecture & engineering topics check." }, fixedBreakfast);
+                let shuffled = shuffleArray([...basicSecondaryPool]); plannedBlocks.push({ ...shuffled[0], dur: 45 }, { ...shuffled[1], dur: 45 }, { ...shuffled[2], dur: 30 }, { id: "grooming", name: "Grooming Maintenance & Coffee Reset", tag: "Rest/Personal", type: "grooming", desc: "Fresh coffee collection alongside clean beard adjustment checks.", dur: 25 });
+            }
+
+            const timelineElement = document.getElementById('schedule-timeline-flow');
+            timelineElement.innerHTML = ''; 
+
+            plannedBlocks.forEach((activity) => {
+                const stepStart = currentMinutes; const stepEnd = currentMinutes + activity.dur; currentMinutes = stepEnd;
+                let categoryStyles = "bg-blue-50 text-blue-800 border-blue-200"; let axisIndicator = "border-blue-600 bg-white shadow-sm";
+                if (activity.type === 'break') { categoryStyles = "bg-slate-100 text-slate-600 border-slate-200"; axisIndicator = "border-slate-400 bg-slate-200"; }
+                else if (activity.type === 'light') { categoryStyles = "bg-emerald-50 text-emerald-800 border-emerald-200"; axisIndicator = "border-emerald-500 bg-emerald-50"; }
+                else if (activity.type === 'grooming') { categoryStyles = "bg-amber-100 text-amber-800 border-amber-200"; axisIndicator = "border-amber-600 bg-amber-50"; }
+
+                timelineElement.insertAdjacentHTML('beforeend', `
+                    <div class="relative pl-6 md:pl-8 group">
+                        <span class="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full border-2 ${axisIndicator} z-10"></span>
+                        <div class="flex flex-col md:flex-row md:items-baseline gap-0.5 mb-1">
+                            <div class="md:absolute md:left-[-150px] md:w-32 md:text-right font-extrabold text-slate-800 text-xs tracking-tight">${formatTimeMarker(stepStart)}</div>
+                            <div class="md:absolute md:left-[-150px] md:top-4 md:w-32 md:text-right font-medium text-slate-400 text-[11px]">to ${formatTimeMarker(stepEnd)}</div>
+                            <h3 class="text-sm font-bold text-slate-900 tracking-tight leading-tight">${activity.name}</h3>
+                            <span class="inline-block text-[9px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded border ${categoryStyles} w-max md:ml-3 mt-1 md:mt-0">${activity.tag} • ${activity.dur}m</span>
+                        </div>
+                        <p class="text-xs text-slate-500 max-w-2xl leading-relaxed font-normal">${activity.desc}</p>
+                    </div>
+                `);
+            });
+            document.getElementById('total-timeline-span').innerText = `ACTIVE FOCUS WINDOW: ${formatTimeMarker(absoluteStart)} — ${formatTimeMarker(currentMinutes)}`;
+            
+            // Temporarily store dynamic configuration elements locally
+            if(!isReadOnlyGirlfriendView) {
+                localStorage.setItem('cached_last_active_duration', hoursSelected);
+            }
+        }
+
+        // Programmatic Render Engine for Tab 2: Checklists
+        function buildSyllabusInterface() {
+            const container = document.getElementById('syllabus-accordion-container');
+            container.innerHTML = '';
+            Object.keys(bankingSyllabusData).forEach((subjectName, subIdx) => {
+                const chapters = bankingSyllabusData[subjectName];
+                let subjectBlockHTML = `
+                    <div class="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                        <div class="bg-slate-200/60 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+                            <h3 class="text-sm font-extrabold text-slate-800 tracking-tight">${subjectName}</h3>
+                            <span id="badge-count-${subIdx}" class="text-[11px] font-bold bg-white text-indigo-700 px-2 py-0.5 rounded-full border border-slate-300">0 / ${chapters.length} Done</span>
+                        </div>
+                        <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-3 bg-white">`;
+
+                chapters.forEach((chapter) => {
+                    const stateCheck = localStorage.getItem(chapter.id) === 'true' ? 'checked' : '';
+                    const disableAttribute = isReadOnlyGirlfriendView ? 'disabled' : '';
+                    subjectBlockHTML += `
+                        <label for="${chapter.id}" class="flex items-start gap-3 p-3 bg-slate-50 hover:bg-slate-100/70 border border-slate-200 rounded-lg cursor-pointer transition select-none">
+                            <input type="checkbox" id="${chapter.id}" ${stateCheck} ${disableAttribute} onchange="onChapterToggle('${chapter.id}', ${subIdx})" class="mt-0.5 w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 transition">
+                            <span class="text-xs font-semibold text-slate-700 leading-normal">${chapter.name}</span>
+                        </label>`;
+                });
+                container.insertAdjacentHTML('beforeend', subjectBlockHTML + `</div></div>`);
+                updateSubjectBadgeCount(subIdx, chapters);
+            });
+        }
+
+        function onChapterToggle(chapterId, subIdx) {
+            if(isReadOnlyGirlfriendView) return;
+            const element = document.getElementById(chapterId);
+            localStorage.setItem(chapterId, element.checked);
+            updateSubjectBadgeCount(subIdx, bankingSyllabusData[Object.keys(bankingSyllabusData)[subIdx]]);
+            computeProgressMetrics();
+            pushStateToCloud();
+        }
+
+        function updateSubjectBadgeCount(subIdx, chapters) {
+            let completedCount = 0;
+            chapters.forEach(ch => { if (localStorage.getItem(ch.id) === 'true') completedCount++; });
+            document.getElementById(`badge-count-${subIdx}`).innerText = `${completedCount} / ${chapters.length} Done`;
+        }
+
+        // Programmatic Render Engine for Tab 3: Performance Graphs
+        function computeProgressMetrics() {
+            const progressContainer = document.getElementById('sectional-progress-container');
+            progressContainer.innerHTML = '';
+            let grandTotal = 0; let grandCompleted = 0;
+
+            Object.keys(bankingSyllabusData).forEach((subjectName) => {
+                const chapters = bankingSyllabusData[subjectName]; let subjectCompleted = 0;
+                chapters.forEach(ch => { grandTotal++; if (localStorage.getItem(ch.id) === 'true') { subjectCompleted++; grandCompleted++; } });
+                const subjectPercentage = chapters.length > 0 ? Math.round((subjectCompleted / chapters.length) * 100) : 0;
+
+                progressContainer.insertAdjacentHTML('beforeend', `
+                    <div class="bg-white p-4 border border-slate-200 rounded-xl shadow-sm">
+                        <div class="flex justify-between items-center mb-1.5 text-xs">
+                            <span class="font-bold text-slate-800">${subjectName}</span>
+                            <span class="font-extrabold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">${subjectPercentage}%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden border border-slate-200/60">
+                            <div class="bg-gradient-to-r from-indigo-500 to-blue-600 h-2.5 rounded-full transition-all duration-500" style="width: ${subjectPercentage}%"></div>
+                        </div>
+                    </div>`);
+            });
+            document.getElementById('overall-percentage-text').innerText = `${grandTotal > 0 ? Math.round((grandCompleted / grandTotal) * 100) : 0}%`;
+        }
+
+        // ==========================================
+        // NEW ADVANCED COMPONENT: TIMELINE HISTORY CONTROLLER
+        // ==========================================
+        function commitActiveDayToHistory() {
+            if(isReadOnlyGirlfriendView) return;
+            const targetTodayStamp = new Date().toDateString();
+            const logHours = parseInt(document.getElementById('planType').value) || 4;
+            
+            // Build Subject distribution weight arrays object structures
+            let metricsMatrixSnapshot = {};
+            Object.keys(bankingSyllabusData).forEach(subject => {
+                const chapters = bankingSyllabusData[subject];
+                let doneCount = 0;
+                chapters.forEach(ch => { if(localStorage.getItem(ch.id) === 'true') doneCount++; });
+                metricsMatrixSnapshot[subject] = chapters.length > 0 ? Math.round((doneCount / chapters.length) * 100) : 0;
+            });
+
+            let trackingHistoryLogs = JSON.parse(localStorage.getItem('study_history_logs')) || {};
+            trackingHistoryLogs[targetTodayStamp] = { hours: logHours, distribution: metricsMatrixSnapshot };
+            
+            localStorage.setItem('study_history_logs', JSON.stringify(trackingHistoryLogs));
+            alert(`Day locked successfully for timestamp: ${targetTodayStamp}!`);
+            
+            renderHistoryCalendarList();
+            pushStateToCloud();
+        }
+
+        function renderHistoryCalendarList() {
+            const listContainer = document.getElementById('calendar-days-log-list');
+            const historyLogs = JSON.parse(localStorage.getItem('study_history_logs')) || {};
+            const keysArray = Object.keys(historyLogs);
+
+            if(keysArray.length === 0) return;
+            listContainer.innerHTML = '';
+
+            keysArray.reverse().forEach(dateKey => {
+                const dayData = historyLogs[dateKey];
+                listContainer.insertAdjacentHTML('beforeend', `
+                    <button onclick="inspectHistoryDate('${dateKey}')" class="w-full text-left p-3 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-lg transition text-xs font-bold text-slate-700 flex justify-between items-center shadow-sm">
+                        <span>📅 ${dateKey}</span>
+                        <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-black">${dayData.hours} Hrs</span>
+                    </button>`);
+            });
+        }
+
+        function inspectHistoryDate(dateKey) {
+            const historyLogs = JSON.parse(localStorage.getItem('study_history_logs')) || {};
+            const selectedLog = historyLogs[dateKey];
+            if(!selectedLog) return;
+
+            document.getElementById('history-workspace-empty').classList.add('hidden');
+            document.getElementById('history-workspace-active').classList.remove('hidden');
+
+            document.getElementById('hist-display-date').innerText = `Data Log Entry: ${dateKey}`;
+            document.getElementById('hist-display-hours').innerText = `${selectedLog.hours} Hours Completed`;
+
+            const barsStack = document.getElementById('history-graph-bars-stack');
+            barsStack.innerHTML = '';
+
+            Object.keys(selectedLog.distribution).forEach(subject => {
+                const weightVal = selectedLog.distribution[subject];
+                barsStack.insertAdjacentHTML('beforeend', `
+                    <div class="text-xs">
+                        <div class="flex justify-between text-[11px] font-medium text-slate-600 mb-0.5">
+                            <span>${subject}</span>
+                            <span class="font-bold text-indigo-600">${weightVal}%</span>
+                        </div>
+                        <div class="w-full bg-slate-200/70 rounded-full h-2 overflow-hidden">
+                            <div class="bg-indigo-600 h-2 rounded-full" style="width: ${weightVal}%"></div>
+                        </div>
+                    </div>`);
+            });
+        }
+
+        // ==========================================
+        // REAL-TIME SUPABASE CLOUD SYNC LOGIC ENGINE
+        // ==========================================
+        async function pushStateToCloud() {
+            if (!supabaseClient || isReadOnlyGirlfriendView) return;
+            
+            // Bundle local storage states to build cloud payloads
+            let statePayload = { checklists: {}, history: JSON.parse(localStorage.getItem('study_history_logs')) || {} };
+            Object.keys(bankingSyllabusData).forEach(subj => {
+                bankingSyllabusData[subj].forEach(ch => {
+                    statePayload.checklists[ch.id] = localStorage.getItem(ch.id) === 'true';
+                });
+            });
+
+            try {
+                const { error } = await supabaseClient
+                    .from('ayush_tracker_sync')
+                    .upsert({ id: 1, dynamic_blob: statePayload, updated_at: new Date() });
+                
+                if(!error) {
+                    setSyncStatusState(true);
+                }
+            } catch(err) { console.error("Cloud write exception parameters:", err); }
+        }
+
+        async function pullStateFromCloud() {
+            if (!supabaseClient) return;
+            try {
+                const { data, error } = await supabaseClient
+                    .from('ayush_tracker_sync')
+                    .select('dynamic_blob')
+                    .eq('id', 1)
+                    .single();
+
+                if (data && data.dynamic_blob) {
+                    const cloudBlob = data.dynamic_blob;
+                    
+                    // Hydrate local variables smoothly
+                    if(cloudBlob.checklists) {
+                        Object.keys(cloudBlob.checklists).forEach(key => {
+                            localStorage.setItem(key, cloudBlob.checklists[key]);
+                        });
+                    }
+                    if(cloudBlob.history) {
+                        localStorage.setItem('study_history_logs', JSON.stringify(cloudBlob.history));
+                    }
+                    
+                    setSyncStatusState(true);
+                    
+                    // Re-render display layouts 
+                    buildSyllabusInterface();
+                    computeProgressMetrics();
+                    renderHistoryCalendarList();
+                }
+            } catch(err) { console.error("Cloud fallback fetch parameters error:", err); }
+        }
+
+        function setSyncStatusState(isConnected) {
+            const badge = document.getElementById('sync-badge');
+            if(isConnected) {
+                badge.className = "bg-emerald-500/20 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full border border-emerald-500/30";
+                badge.innerText = "Cloud Synced Live";
+            } else {
+                badge.className = "bg-rose-500/20 text-rose-300 text-xs font-bold px-3 py-1 rounded-full border border-rose-500/30";
+                badge.innerText = "Database Disconnected";
+            }
+        }
+
+        // Bootstrap Core App Initialization Loops
+        window.onload = function() {
+            const cachedDuration = localStorage.getItem('cached_last_active_duration');
+            if(cachedDuration) { document.getElementById('planType').value = cachedDuration; }
+            
+            buildSyllabusInterface();
+            computeProgressMetrics();
+            renderHistoryCalendarList();
+            generateSchedule();
+
+            if (supabaseClient) {
+                // If it is read-only view, fetch instantly from database. Otherwise pull once and link events.
+                pullStateFromCloud();
+                if(isReadOnlyGirlfriendView) {
+                    // Poll periodically to query adjustments while watching live
+                    setInterval(pullStateFromCloud, 10000);
+                }
+            }
+        };
+    </script>
+</body>
+</html>
