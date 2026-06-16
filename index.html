@@ -178,12 +178,14 @@
         // CONFIGURATION: SETUP CLOUD DB PARAMS
         // ==========================================
         const SUPABASE_URL = "https://dneewrdwwelawdafuqti.supabase.co"; 
-	const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuZWV3cmR3d2VsYXdkYWZ1cXRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1ODEzNjEsImV4cCI6MjA5NzE1NzM2MX0.mpqxLCBP9ocI0sNUo3PD5QY1Gv7SoVmSBGFnk9PkF3Y"; 
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuZWV3cmR3d2VsYXdkYWZ1cXRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1ODEzNjEsImV4cCI6MjA5NzE1NzM2MX0.mpqxLCBP9ocI0sNUo3PD5QY1Gv7SoVmSBGFnk9PkF3Y";
         let supabaseClient = null;
         let isReadOnlyGirlfriendView = false;
 
-        // Initialize Supabase Client Connection Safeguard
-		supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Establish direct connection to database client
+        if(SUPABASE_KEY !== "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuZWV3cmR3d2VsYXdkYWZ1cXRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1ODEzNjEsImV4cCI6MjA5NzE1NzM2MX0.mpqxLCBP9ocI0sNUo3PD5QY1Gv7SoVmSBGFnk9PkF3Y") {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
 
         // Evaluate query constraints to verify audience path identity models
         const runtimeURLParams = new URLSearchParams(window.location.search);
@@ -286,16 +288,45 @@
             const hoursSelected = parseInt(document.getElementById('planType').value);
             if (!timeRaw) return;
 
-            const [hours, minutes] = timeRaw.split(':').map(Number);
-            let currentMinutes = hours * 60 + minutes;
+            const [startHour, startMinutes] = timeRaw.split(':').map(Number);
+            let currentMinutes = startHour * 60 + startMinutes;
             const absoluteStart = currentMinutes;
             let plannedBlocks = [];
 
-            const fixedWarmUp = { dur: 15, tag: "Warm-Up", name: "Morning Warm-up + CA Headlines", type: "light", desc: "AffairsCloud headlines + gentle warm stretching." };
-            const fixedBreakfast = { dur: 30, tag: "Break", name: "Breakfast / Refreshment Break", type: "break", desc: "Complete separation from screens to preserve nervous energy." };
-            const fixedLunch = { dur: 45, tag: "Break", name: "Lunch & Mid-Day Reset", type: "break", desc: "Step away completely, rehydrate, rest mind." };
-            const groomingBlock = { id: "grooming", name: "Grooming Maintenance & Coffee Reset", tag: "Rest/Personal", type: "grooming", desc: "Fresh coffee collection alongside clean beard adjustment checks.", dur: 25 };
+            // 🕒 SMART DYNAMIC TIME-AWARE BREAK GENERATION ENGINE
+            const isLateStart = startHour >= 12;
 
+            const fixedWarmUp = { 
+                dur: 15, 
+                tag: isLateStart ? "KICKOFF" : "WARM-UP", 
+                name: isLateStart ? "Afternoon Activation & CA Headliners" : "Morning Warm-up + CA Headlines", 
+                type: "light", 
+                desc: isLateStart ? "Quick mid-day brain dump and speed check of live economic headlines." : "AffairsCloud headlines + gentle warm stretching." 
+            };
+            const fixedBreakfast = { 
+                dur: 30, 
+                tag: "BREAK", 
+                name: isLateStart ? "Evening Coffee & Snack Break" : "Breakfast / Refreshment Break", 
+                type: "break", 
+                desc: isLateStart ? "Disconnect from the display and grab a fresh coffee brew to preserve high focus." : "Complete separation from screens to preserve nervous energy." 
+            };
+            const fixedLunch = { 
+                dur: 45, 
+                tag: "BREAK", 
+                name: isLateStart ? "Dinner & Night-Owl Reset" : "Lunch & Mid-Day Reset", 
+                type: "break", 
+                desc: isLateStart ? "Step away completely for dinner, stretch out, and oxygenate before the final revision blocks." : "Step away completely, rehydrate, rest mind." 
+            };
+            const groomingBlock = { 
+                id: "grooming", 
+                tag: "PERSONAL", 
+                name: "Grooming Check & Coffee Top-up", 
+                type: "grooming", 
+                desc: "Quick workspace cleanup, crisp beard lining check, and refilling caffeine reserves.", 
+                dur: 25 
+            };
+
+            // Structure Allocations based on dynamic timing profiles
             if (hoursSelected === 3) {
                 plannedBlocks.push(fixedWarmUp, { dur: 60, tag: "QA PEAK", name: "Quantitative Aptitude (SI & CI)", type: "core", desc: "High conversion arithmetic calculation practice drills." }, { dur: 60, tag: "IT PEAK", name: "Professional Knowledge (IT Core)", type: "core", desc: "DBMS/OS conceptual acceleration sets." });
                 let shuffled = shuffleArray([...basicSecondaryPool]); plannedBlocks.push({ ...shuffled[0], dur: 45 });
@@ -304,13 +335,11 @@
                 let shuffled = shuffleArray([...basicSecondaryPool]); plannedBlocks.push({ ...shuffled[0], dur: 45 }, { ...shuffled[1], dur: 40 });
             } else if (hoursSelected === 5) {
                 plannedBlocks.push(fixedWarmUp, { dur: 75, tag: "QA PEAK", name: "Quantitative Aptitude (SI & CI)", type: "core", desc: "Targeted focus: Simple & Compound Interest tracking bounds." }, { dur: 75, tag: "IT PEAK", name: "Professional Knowledge (IT Core)", type: "core", desc: "Networks & Data Structures practice routines." }, fixedBreakfast);
-                let shuffled = shuffleArray([...basicSecondaryPool]); plannedBlocks.push({ ...shuffled[0], dur: 45 }, { ...shuffled[1], py0: 40 }, { ...shuffled[2], dur: 30 });
+                let shuffled = shuffleArray([...basicSecondaryPool]); plannedBlocks.push({ ...shuffled[0], dur: 45 }, { ...shuffled[1], dur: 40 }, { ...shuffled[2], dur: 30 });
             } else if (hoursSelected === 6) {
                 plannedBlocks.push(fixedWarmUp, { dur: 90, tag: "QA PEAK", name: "Quantitative Aptitude (Core Focus)", type: "core", desc: "30 timed arithmetic questions. Primary priority: Simple & Compound Interest." }, { dur: 90, tag: "IT PEAK", name: "Professional Knowledge (IT Officer)", type: "core", desc: "Core computer architecture & engineering topics check." }, fixedBreakfast);
                 let shuffled = shuffleArray([...basicSecondaryPool]); plannedBlocks.push({ ...shuffled[0], dur: 45 }, { ...shuffled[1], dur: 45 }, { ...shuffled[2], dur: 30 }, groomingBlock);
-            } 
-            // NEW INTERACTIVE ALLOCATIONS BASED ON NEW USER PREFERENCES
-            else if (hoursSelected === 7) { // 7-8 Hour Strategy (Totaling 450 Mins)
+            } else if (hoursSelected === 7) { 
                 plannedBlocks.push(
                     fixedWarmUp, 
                     { dur: 100, tag: "QA PEAK", name: "Quantitative Aptitude (SI & CI Intense Focus)", type: "core", desc: "Advanced data interpretation cases and compound interest formula mechanics." },
@@ -320,7 +349,7 @@
                 );
                 let shuffled = shuffleArray([...basicSecondaryPool]);
                 plannedBlocks.push({ ...shuffled[0], dur: 50 }, { ...shuffled[1], dur: 50 }, groomingBlock, { ...shuffled[2], dur: 35 });
-            } else if (hoursSelected === 8) { // 8 Hour Strategy (Totaling 510 Mins)
+            } else if (hoursSelected === 8) { 
                 plannedBlocks.push(
                     fixedWarmUp,
                     { dur: 120, tag: "QA PEAK", name: "Quantitative Aptitude (Mastery Module)", type: "core", desc: "Full arithmetic test run, tracking calculation speeds on structural interest problems." },
@@ -330,7 +359,7 @@
                 );
                 let shuffled = shuffleArray([...basicSecondaryPool]);
                 plannedBlocks.push({ ...shuffled[0], dur: 60 }, { ...shuffled[1], dur: 60 }, groomingBlock, { ...shuffled[2], dur: 40 });
-            } else if (hoursSelected === 9) { // 9+ Hour Strategy (Totaling 590 Mins)
+            } else if (hoursSelected === 9) { 
                 plannedBlocks.push(
                     fixedWarmUp,
                     { dur: 130, tag: "QA SURGE", name: "Quantitative Aptitude (High-Yield Speed Engine)", type: "core", desc: "Mixed arithmetic arrays, complex tabular interpretation grids, calculations speed sprint." },
@@ -447,7 +476,6 @@
             const targetTodayStamp = new Date().toDateString();
             const logHoursRaw = parseInt(document.getElementById('planType').value);
             
-            // Format labels cleanly depending on selection values
             let labelText = logHoursRaw + " Hours";
             if(logHoursRaw === 7) labelText = "7-8 Hours";
             if(logHoursRaw === 9) labelText = "9+ Hours";
