@@ -47,6 +47,9 @@
                         <option value="4">4-Hour Plan (Core Balanced)</option>
                         <option value="5">5-Hour Plan (Advanced Cover)</option>
                         <option value="6">6-Hour Plan (Comprehensive)</option>
+                        <option value="7">7-8 Hour Plan (High-Intensity Push)</option>
+                        <option value="8">8-Hour Plan (Elite Grind Mode)</option>
+                        <option value="9">9+ Hour Plan (Extreme Revision Marathon)</option>
                     </select>
                 </div>
                 <div class="flex items-end gap-2">
@@ -71,7 +74,7 @@
                     📊 Progress
                 </button>
                 <button onclick="switchTab('history-tab')" id="btn-history-tab" class="py-2.5 px-3 md:px-4 font-medium text-indigo-200 hover:text-white border-b-2 border-transparent focus:outline-none transition">
-                    📆 History Calendar
+                    &nbsp;📆 History Calendar
                 </button>
             </div>
         </div>
@@ -125,14 +128,13 @@
                 </div>
             </div>
 
-            <!-- NEW TAB 4: CALENDAR TIMELINE HISTORY SYSTEM WITH PROGRESS GRAPS -->
+            <!-- TAB 4: CALENDAR TIMELINE HISTORY SYSTEM WITH PROGRESS GRAPHS -->
             <div id="history-tab" class="tab-content hidden">
                 <div class="border-b border-slate-200 pb-4 mb-6">
                     <h2 class="text-xl font-bold text-slate-800">Historical Tracking Calendar</h2>
                     <p class="text-xs text-slate-400 mt-0.5">Select a logged calendar day to check past study durations and subject distribution performance charts.</p>
                 </div>
-                const SUPABASE_URL = "https://dneewrdwwelawdafuqti.supabase.co";
-		const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuZWV3cmR3d2VsYXdkYWZ1cXRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1ODEzNjEsImV4cCI6MjA5NzE1NzM2MX0.mpqxLCBP9ocI0sNUo3PD5QY1Gv7SoVmSBGFnk9PkF3Y";
+                
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Mini Left Pane Calendar Day Index Registry Node -->
                     <div class="bg-slate-50 p-4 border border-slate-200 rounded-xl">
@@ -173,10 +175,10 @@
 
     <script>
         // ==========================================
-        // STEP 2 CONFIGURATION: SETUP CLOUD DB PARAMS
+        // CONFIGURATION: SETUP CLOUD DB PARAMS
         // ==========================================
-        const SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co"; 
-        const SUPABASE_KEY = "YOUR_ANON_PUBLIC_KEY"; 
+        const SUPABASE_URL = "https://dneewrdwwelawdafuqti.supabase.co"; 
+	const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuZWV3cmR3d2VsYXdkYWZ1cXRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1ODEzNjEsImV4cCI6MjA5NzE1NzM2MX0.mpqxLCBP9ocI0sNUo3PD5QY1Gv7SoVmSBGFnk9PkF3Y"; 
         let supabaseClient = null;
         let isReadOnlyGirlfriendView = false;
 
@@ -223,7 +225,7 @@
 
         const bankingSyllabusData = {
             "Quantitative Aptitude": [
-                { id: "qa_si_ci", name: "Simple & Compound Interest (Urgent priority untouched topic)" },
+                { id: "qa_si_ci", name: "Simple & Compound Interest" },
                 { id: "qa_num_sys", name: "Number System, Simplification & Approximations" },
                 { id: "qa_pct", name: "Percentage, Ratio & Proportion structures" },
                 { id: "qa_avg", name: "Averages & Mixtures (Alligation framework)" },
@@ -255,7 +257,7 @@
                 { id: "re_sufficiency", name: "Data Sufficiency evaluation logic rules" }
             ],
             "English Language": [
-                { id: "en_grammar", name: "Grammar Rules Crash Focus (Urgent priority untouched topic)" },
+                { id: "en_grammar", name: "Grammar Rules Crash Focus" },
                 { id: "en_error", name: "Error Detection, Extraction & Correction rules" },
                 { id: "en_rc", name: "Reading Comprehension fluency & inference analytics" },
                 { id: "en_jumbles", name: "Para-Jumbles, Para-Completion & Sentence Rearrangements" },
@@ -293,6 +295,8 @@
 
             const fixedWarmUp = { dur: 15, tag: "Warm-Up", name: "Morning Warm-up + CA Headlines", type: "light", desc: "AffairsCloud headlines + gentle warm stretching." };
             const fixedBreakfast = { dur: 30, tag: "Break", name: "Breakfast / Refreshment Break", type: "break", desc: "Complete separation from screens to preserve nervous energy." };
+            const fixedLunch = { dur: 45, tag: "Break", name: "Lunch & Mid-Day Reset", type: "break", desc: "Step away completely, rehydrate, rest mind." };
+            const groomingBlock = { id: "grooming", name: "Grooming Maintenance & Coffee Reset", tag: "Rest/Personal", type: "grooming", desc: "Fresh coffee collection alongside clean beard adjustment checks.", dur: 25 };
 
             if (hoursSelected === 3) {
                 plannedBlocks.push(fixedWarmUp, { dur: 60, tag: "QA PEAK", name: "Quantitative Aptitude (SI & CI)", type: "core", desc: "High conversion arithmetic calculation practice drills." }, { dur: 60, tag: "IT PEAK", name: "Professional Knowledge (IT Core)", type: "core", desc: "DBMS/OS conceptual acceleration sets." });
@@ -302,10 +306,43 @@
                 let shuffled = shuffleArray([...basicSecondaryPool]); plannedBlocks.push({ ...shuffled[0], dur: 45 }, { ...shuffled[1], dur: 40 });
             } else if (hoursSelected === 5) {
                 plannedBlocks.push(fixedWarmUp, { dur: 75, tag: "QA PEAK", name: "Quantitative Aptitude (SI & CI)", type: "core", desc: "Targeted focus: Simple & Compound Interest tracking bounds." }, { dur: 75, tag: "IT PEAK", name: "Professional Knowledge (IT Core)", type: "core", desc: "Networks & Data Structures practice routines." }, fixedBreakfast);
-                let shuffled = shuffleArray([...basicSecondaryPool]); plannedBlocks.push({ ...shuffled[0], dur: 45 }, { ...shuffled[1], dur: 40 }, { ...shuffled[2], dur: 30 });
+                let shuffled = shuffleArray([...basicSecondaryPool]); plannedBlocks.push({ ...shuffled[0], dur: 45 }, { ...shuffled[1], py0: 40 }, { ...shuffled[2], dur: 30 });
             } else if (hoursSelected === 6) {
                 plannedBlocks.push(fixedWarmUp, { dur: 90, tag: "QA PEAK", name: "Quantitative Aptitude (Core Focus)", type: "core", desc: "30 timed arithmetic questions. Primary priority: Simple & Compound Interest." }, { dur: 90, tag: "IT PEAK", name: "Professional Knowledge (IT Officer)", type: "core", desc: "Core computer architecture & engineering topics check." }, fixedBreakfast);
-                let shuffled = shuffleArray([...basicSecondaryPool]); plannedBlocks.push({ ...shuffled[0], dur: 45 }, { ...shuffled[1], dur: 45 }, { ...shuffled[2], dur: 30 }, { id: "grooming", name: "Grooming Maintenance & Coffee Reset", tag: "Rest/Personal", type: "grooming", desc: "Fresh coffee collection alongside clean beard adjustment checks.", dur: 25 });
+                let shuffled = shuffleArray([...basicSecondaryPool]); plannedBlocks.push({ ...shuffled[0], dur: 45 }, { ...shuffled[1], dur: 45 }, { ...shuffled[2], dur: 30 }, groomingBlock);
+            } 
+            // NEW INTERACTIVE ALLOCATIONS BASED ON NEW USER PREFERENCES
+            else if (hoursSelected === 7) { // 7-8 Hour Strategy (Totaling 450 Mins)
+                plannedBlocks.push(
+                    fixedWarmUp, 
+                    { dur: 100, tag: "QA PEAK", name: "Quantitative Aptitude (SI & CI Intense Focus)", type: "core", desc: "Advanced data interpretation cases and compound interest formula mechanics." },
+                    fixedBreakfast,
+                    { dur: 100, tag: "IT PEAK", name: "Professional Knowledge (Advanced IT Officer Core)", type: "core", desc: "Deep dive debugging loops, query structural normalizations, algorithm run complexities." },
+                    fixedLunch
+                );
+                let shuffled = shuffleArray([...basicSecondaryPool]);
+                plannedBlocks.push({ ...shuffled[0], dur: 50 }, { ...shuffled[1], dur: 50 }, groomingBlock, { ...shuffled[2], dur: 35 });
+            } else if (hoursSelected === 8) { // 8 Hour Strategy (Totaling 510 Mins)
+                plannedBlocks.push(
+                    fixedWarmUp,
+                    { dur: 120, tag: "QA PEAK", name: "Quantitative Aptitude (Mastery Module)", type: "core", desc: "Full arithmetic test run, tracking calculation speeds on structural interest problems." },
+                    fixedBreakfast,
+                    { dur: 120, tag: "IT PEAK", name: "Professional Knowledge (Systems Architecture)", type: "core", desc: "Network routing protocol blocks, OS file structures, process control blocks." },
+                    fixedLunch
+                );
+                let shuffled = shuffleArray([...basicSecondaryPool]);
+                plannedBlocks.push({ ...shuffled[0], dur: 60 }, { ...shuffled[1], dur: 60 }, groomingBlock, { ...shuffled[2], dur: 40 });
+            } else if (hoursSelected === 9) { // 9+ Hour Strategy (Totaling 590 Mins)
+                plannedBlocks.push(
+                    fixedWarmUp,
+                    { dur: 130, tag: "QA SURGE", name: "Quantitative Aptitude (High-Yield Speed Engine)", type: "core", desc: "Mixed arithmetic arrays, complex tabular interpretation grids, calculations speed sprint." },
+                    fixedBreakfast,
+                    { dur: 130, tag: "IT SURGE", name: "Professional Knowledge (Full Core Review)", type: "core", desc: "Comprehensive structural sweeps: software engineering models, security architectures, object loops." },
+                    fixedLunch,
+                    { dur: 75, tag: "EVALUATION", name: "Full Simulation Practice Mock Test", type: "core", desc: "Timed layout simulation checking structural exam endurance profiles." }
+                );
+                let shuffled = shuffleArray([...basicSecondaryPool]);
+                plannedBlocks.push({ ...shuffled[0], dur: 65 }, { ...shuffled[1], dur: 65 }, groomingBlock, { ...shuffled[2], dur: 45 });
             }
 
             const timelineElement = document.getElementById('schedule-timeline-flow');
@@ -333,7 +370,6 @@
             });
             document.getElementById('total-timeline-span').innerText = `ACTIVE FOCUS WINDOW: ${formatTimeMarker(absoluteStart)} — ${formatTimeMarker(currentMinutes)}`;
             
-            // Temporarily store dynamic configuration elements locally
             if(!isReadOnlyGirlfriendView) {
                 localStorage.setItem('cached_last_active_duration', hoursSelected);
             }
@@ -407,15 +443,17 @@
             document.getElementById('overall-percentage-text').innerText = `${grandTotal > 0 ? Math.round((grandCompleted / grandTotal) * 100) : 0}%`;
         }
 
-        // ==========================================
-        // NEW ADVANCED COMPONENT: TIMELINE HISTORY CONTROLLER
-        // ==========================================
+        // TIMELINE HISTORY CONTROLLER
         function commitActiveDayToHistory() {
             if(isReadOnlyGirlfriendView) return;
             const targetTodayStamp = new Date().toDateString();
-            const logHours = parseInt(document.getElementById('planType').value) || 4;
+            const logHoursRaw = parseInt(document.getElementById('planType').value);
             
-            // Build Subject distribution weight arrays object structures
+            // Format labels cleanly depending on selection values
+            let labelText = logHoursRaw + " Hours";
+            if(logHoursRaw === 7) labelText = "7-8 Hours";
+            if(logHoursRaw === 9) labelText = "9+ Hours";
+            
             let metricsMatrixSnapshot = {};
             Object.keys(bankingSyllabusData).forEach(subject => {
                 const chapters = bankingSyllabusData[subject];
@@ -425,7 +463,7 @@
             });
 
             let trackingHistoryLogs = JSON.parse(localStorage.getItem('study_history_logs')) || {};
-            trackingHistoryLogs[targetTodayStamp] = { hours: logHours, distribution: metricsMatrixSnapshot };
+            trackingHistoryLogs[targetTodayStamp] = { hours: labelText, distribution: metricsMatrixSnapshot };
             
             localStorage.setItem('study_history_logs', JSON.stringify(trackingHistoryLogs));
             alert(`Day locked successfully for timestamp: ${targetTodayStamp}!`);
@@ -447,7 +485,7 @@
                 listContainer.insertAdjacentHTML('beforeend', `
                     <button onclick="inspectHistoryDate('${dateKey}')" class="w-full text-left p-3 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-lg transition text-xs font-bold text-slate-700 flex justify-between items-center shadow-sm">
                         <span>📅 ${dateKey}</span>
-                        <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-black">${dayData.hours} Hrs</span>
+                        <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-black">${dayData.hours}</span>
                     </button>`);
             });
         }
@@ -461,7 +499,7 @@
             document.getElementById('history-workspace-active').classList.remove('hidden');
 
             document.getElementById('hist-display-date').innerText = `Data Log Entry: ${dateKey}`;
-            document.getElementById('hist-display-hours').innerText = `${selectedLog.hours} Hours Completed`;
+            document.getElementById('hist-display-hours').innerText = `${selectedLog.hours} Completed`;
 
             const barsStack = document.getElementById('history-graph-bars-stack');
             barsStack.innerHTML = '';
@@ -481,13 +519,10 @@
             });
         }
 
-        // ==========================================
         // REAL-TIME SUPABASE CLOUD SYNC LOGIC ENGINE
-        // ==========================================
         async function pushStateToCloud() {
             if (!supabaseClient || isReadOnlyGirlfriendView) return;
             
-            // Bundle local storage states to build cloud payloads
             let statePayload = { checklists: {}, history: JSON.parse(localStorage.getItem('study_history_logs')) || {} };
             Object.keys(bankingSyllabusData).forEach(subj => {
                 bankingSyllabusData[subj].forEach(ch => {
@@ -518,7 +553,6 @@
                 if (data && data.dynamic_blob) {
                     const cloudBlob = data.dynamic_blob;
                     
-                    // Hydrate local variables smoothly
                     if(cloudBlob.checklists) {
                         Object.keys(cloudBlob.checklists).forEach(key => {
                             localStorage.setItem(key, cloudBlob.checklists[key]);
@@ -530,7 +564,6 @@
                     
                     setSyncStatusState(true);
                     
-                    // Re-render display layouts 
                     buildSyllabusInterface();
                     computeProgressMetrics();
                     renderHistoryCalendarList();
@@ -560,10 +593,8 @@
             generateSchedule();
 
             if (supabaseClient) {
-                // If it is read-only view, fetch instantly from database. Otherwise pull once and link events.
                 pullStateFromCloud();
                 if(isReadOnlyGirlfriendView) {
-                    // Poll periodically to query adjustments while watching live
                     setInterval(pullStateFromCloud, 10000);
                 }
             }
