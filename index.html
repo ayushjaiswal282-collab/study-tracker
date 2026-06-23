@@ -6,19 +6,25 @@
     <title>Cloud-Synced Banking Study Hub</title>
     <!-- Tailwind CSS for modern layout -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Enable Tailwind class-based dark mode
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
     <!-- html2pdf.js for local PDF exports -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <!-- Supabase CDN for Real-Time Cloud Database Synchronization -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-slate-100 font-sans min-h-screen py-8 px-4">
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans min-h-screen py-8 px-4 transition-colors duration-200">
 
     <!-- View Mode Notification Banner -->
-    <div id="view-mode-banner" class="max-w-4xl mx-auto mb-4 hidden bg-amber-50 border border-amber-200 rounded-xl p-3 text-center text-xs font-bold text-amber-800 shadow-sm">
+    <div id="view-mode-banner" class="max-w-4xl mx-auto mb-4 hidden bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 rounded-xl p-3 text-center text-xs font-bold text-amber-800 dark:text-amber-300 shadow-sm">
         👀 Viewing in Read-Only Mode (Girlfriend View). Live edits are disabled to protect Ayush's active session data.
     </div>
 
-    <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-100">
+    <div class="max-w-4xl mx-auto bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-800 transition-colors duration-200">
         
         <!-- Dashboard Control Header -->
         <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 p-6 md:p-8 text-white">
@@ -27,7 +33,11 @@
                     <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">BANKING STRATEGY HUB</h1>
                     <p class="text-indigo-200 text-xs md:text-sm mt-1">CIL MT / SBI PO / IBPS SO IT Officer Dynamic Engine</p>
                 </div>
-                <div class="flex flex-col items-end gap-1">
+                <div class="flex flex-wrap items-center gap-2 md:self-start">
+                    <!-- Dark Mode Toggle Switch -->
+                    <button onclick="toggleDarkMode()" id="theme-toggle" class="bg-white/10 hover:bg-white/20 text-white rounded-lg px-3 py-1 text-xs font-bold transition flex items-center gap-1.5 border border-white/10">
+                        <span id="theme-toggle-icon">🌙</span> <span id="theme-toggle-text">Dark Mode</span>
+                    </button>
                     <span id="sync-badge" class="bg-rose-500/20 text-rose-300 text-xs font-bold px-3 py-1 rounded-full border border-rose-500/30">
                         Database Disconnected
                     </span>
@@ -38,18 +48,18 @@
             <div id="editor-controls-panel" class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-white/5 p-4 rounded-xl backdrop-blur-md border border-white/10 mb-6">
                 <div>
                     <label for="startTime" class="block text-[11px] font-bold uppercase tracking-wider text-indigo-300 mb-1.5">Study Start Time</label>
-                    <input type="time" id="startTime" value="08:00" onchange="generateSchedule()" class="w-full bg-white text-slate-900 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none">
+                    <input type="time" id="startTime" value="08:00" onchange="generateSchedule()" class="w-full bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none">
                 </div>
                 <div>
                     <label for="planType" class="block text-[11px] font-bold uppercase tracking-wider text-indigo-300 mb-1.5">Duration of Study</label>
-                    <select id="planType" onchange="generateSchedule()" class="w-full bg-white text-slate-900 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none">
+                    <select id="planType" onchange="generateSchedule()" class="w-full bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none">
                         <option value="3">3-Hour Plan (Ultra Focused)</option>
                         <option value="4">4-Hour Plan (Core Balanced)</option>
                         <option value="5">5-Hour Plan (Advanced Cover)</option>
                         <option value="6">6-Hour Plan (Comprehensive)</option>
-                        <option value="7">7-8 Hour Plan (High-Intensity Push)</option>
-                        <option value="8">8-Hour Plan (Elite Grind Mode)</option>
-                        <option value="9">9+ Hour Plan (Extreme Revision Marathon)</option>
+                        <option value="7">7-Hour Plan (Intensive Drill)</option>
+                        <option value="8">8-Hour Plan (Marathon Session)</option>
+                        <option value="9">9+ Hour Plan (Extreme Grind)</option>
                     </select>
                 </div>
                 <div class="flex items-end gap-2">
@@ -62,105 +72,286 @@
                 </div>
             </div>
 
-            <!-- Four-Tab Router Links Layout -->
+            <!-- Header Tabs Navigation Layout Router Links -->
             <div class="flex flex-wrap border-b border-white/10 gap-1 text-xs md:text-sm">
-                <button onclick="switchTab('schedule-tab')" id="btn-schedule-tab" class="py-2.5 px-3 md:px-4 font-bold border-b-2 border-white text-white focus:outline-none transition">
+                <button onclick="switchTab('tasks-tab')" id="btn-tasks-tab" class="py-2.5 px-3 md:px-4 font-bold border-b-2 border-white text-white focus:outline-none transition">
+                    📝 Manage Tasks
+                </button>
+                <button onclick="switchTab('schedule-tab')" id="btn-schedule-tab" class="py-2.5 px-3 md:px-4 font-medium text-indigo-200 hover:text-white border-b-2 border-transparent focus:outline-none transition">
                     📅 Daily Schedule
                 </button>
                 <button onclick="switchTab('completed-tab')" id="btn-completed-tab" class="py-2.5 px-3 md:px-4 font-medium text-indigo-200 hover:text-white border-b-2 border-transparent focus:outline-none transition">
                     ✅ Completed Subject
                 </button>
+                <button onclick="switchTab('mocks-tab')" id="btn-mocks-tab" class="py-2.5 px-3 md:px-4 font-medium text-indigo-200 hover:text-white border-b-2 border-transparent focus:outline-none transition">
+                    📊 Mock Marks
+                </button>
                 <button onclick="switchTab('progress-tab')" id="btn-progress-tab" class="py-2.5 px-3 md:px-4 font-medium text-indigo-200 hover:text-white border-b-2 border-transparent focus:outline-none transition">
                     📊 Progress
                 </button>
                 <button onclick="switchTab('history-tab')" id="btn-history-tab" class="py-2.5 px-3 md:px-4 font-medium text-indigo-200 hover:text-white border-b-2 border-transparent focus:outline-none transition">
-                    &nbsp;📆 History Calendar
+                    📆 History Calendar
                 </button>
             </div>
         </div>
 
         <!-- Master Tab Layout Canvas View Wrapper -->
-        <div id="timetable-print-zone" class="p-6 md:p-8 bg-white">
+        <div id="timetable-print-zone" class="p-6 md:p-8 bg-white dark:bg-slate-900 transition-colors duration-200">
             
-            <!-- TAB 1: LIVE DAILY TIMETABLE -->
-            <div id="schedule-tab" class="tab-content">
-                <div class="border-b border-slate-200 pb-4 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                    <div>
-                        <h2 class="text-xl font-bold text-slate-800">Customized Study Agenda</h2>
-                        <p class="text-xs text-slate-400 mt-0.5">High-yielding priorities remain systematically locked first; secondary variables rotate.</p>
-                    </div>
-                    <div id="total-timeline-span" class="text-xs md:text-sm font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-lg"></div>
+            <!-- TAB 1: CUSTOM DAILY TASKS CRUD MANAGEMENT -->
+            <div id="tasks-tab" class="tab-content">
+                <div class="border-b border-slate-200 dark:border-slate-800 pb-4 mb-6">
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100">Daily Task Pool Builder</h2>
+                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Add, update, or remove distinct priority tasks. The timetable structure auto-packs sequentially using items below.</p>
                 </div>
-                <div id="schedule-timeline-flow" class="relative border-l border-slate-200 ml-3 md:ml-36 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Task Input Form Console -->
+                    <div id="task-form-panel" class="bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-xl p-4 h-fit">
+                        <h3 id="task-form-title" class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3">Add Custom Task</h3>
+                        <input type="hidden" id="edit-task-id" value="">
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Task Title</label>
+                                <input type="text" id="task-title" placeholder="e.g., Quadratic Equations Practice" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none font-medium text-slate-800 dark:text-slate-100">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Duration (Mins)</label>
+                                    <input type="number" id="task-duration" min="5" max="240" value="45" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none font-bold text-slate-800 dark:text-slate-100">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Classification</label>
+                                    <select id="task-type" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none font-semibold text-slate-700 dark:text-slate-300">
+                                        <option value="core">Core Focus</option>
+                                        <option value="light">Light Study</option>
+                                        <option value="break">Break</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Tag Identifier</label>
+                                <input type="text" id="task-tag" placeholder="e.g., QA PEAK, REASONING" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none font-bold text-slate-700 dark:text-slate-300 uppercase">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Operational Strategy Description</label>
+                                <textarea id="task-desc" rows="3" placeholder="Target points, specific links, or notes..." class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none text-slate-600 dark:text-slate-400 leading-normal"></textarea>
+                            </div>
+                            <div class="flex gap-2 pt-1">
+                                <button onclick="clearTaskForm()" id="btn-cancel-task-edit" class="hidden flex-1 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-2 px-3 rounded-lg text-xs transition">Cancel</button>
+                                <button onclick="saveCustomTask()" id="btn-save-task" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded-lg text-xs transition shadow-sm">Save Task</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Master Registry List Output Container -->
+                    <div class="md:col-span-2 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
+                        <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2 mb-3">
+                            <h3 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Active Task Sequence Stack</h3>
+                            <span id="task-pool-counter" class="text-[10px] bg-slate-200 dark:bg-slate-700 font-black text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-full">0 Mins Total</span>
+                        </div>
+                        <div id="custom-tasks-registry-stack" class="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+                            <!-- Dynamic Task rows inject here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: LIVE DAILY TIMETABLE -->
+            <div id="schedule-tab" class="tab-content hidden">
+                <div class="border-b border-slate-200 dark:border-slate-800 pb-4 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100">Customized Study Agenda</h2>
+                        <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">High-yielding priorities remain systematically locked first; secondary variables rotate.</p>
+                    </div>
+                    <div id="total-timeline-span" class="text-xs md:text-sm font-bold text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 px-3 py-1 rounded-lg"></div>
+                </div>
+                
+                <!-- Testing Pulse Metrics Widget Row Layout -->
+                <div id="timetable-mock-pulse-row" class="mb-6 p-4 bg-gradient-to-r from-amber-50 to-indigo-50 dark:from-amber-950/20 dark:to-indigo-950/20 border border-indigo-100 dark:border-indigo-900/50 rounded-xl hidden text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm">
+                    <!-- Generated dynamic mock analytics are injected here -->
+                </div>
+
+                <div id="schedule-timeline-flow" class="relative border-l border-slate-200 dark:border-slate-800 ml-3 md:ml-36 space-y-6">
                     <!-- Javascript populates scheduling entries here -->
                 </div>
             </div>
 
-            <!-- TAB 2: SUBJECT-WISE TARGET STATUS MATRIX CHECKLISTS -->
+            <!-- TAB 3: SUBJECT-WISE TARGET STATUS MATRIX CHECKLISTS -->
             <div id="completed-tab" class="tab-content hidden">
-                <div class="border-b border-slate-200 pb-4 mb-6">
-                    <h2 class="text-xl font-bold text-slate-800">Syllabus Matrix & Milestone Checklists</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Check off chapters upon functional completion. Metrics refresh globally across the interface.</p>
+                <div class="border-b border-slate-200 dark:border-slate-800 pb-4 mb-6">
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100">Syllabus Matrix & Milestone Checklists</h2>
+                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Check off chapters upon functional completion. Metrics refresh globally across the interface.</p>
                 </div>
                 <div id="syllabus-accordion-container" class="space-y-6">
                     <!-- Programmatic subject accordion layouts generated here -->
                 </div>
             </div>
 
-            <!-- TAB 3: MASTER VELOCITY ANALYTICS -->
-            <div id="progress-tab" class="tab-content hidden">
-                <div class="border-b border-slate-200 pb-4 mb-6">
-                    <h2 class="text-xl font-bold text-slate-800">Live Preparation Velocity Analytics</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Aggregated visual completion distribution across core target themes.</p>
+            <!-- TAB 4: MOCK MARKS CONSOLE INTERACTIVE DASHBOARD -->
+            <div id="mocks-tab" class="tab-content hidden">
+                <div class="border-b border-slate-200 dark:border-slate-800 pb-4 mb-4">
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100">Mock Marks Ledger Engine</h2>
+                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Log and track your performance trends down across three structural sub-tiers.</p>
                 </div>
-                <div class="bg-gradient-to-br from-indigo-50 to-slate-50 border border-indigo-100 rounded-2xl p-6 mb-8 flex flex-col sm:flex-row items-center gap-6 shadow-sm">
-                    <div class="relative w-24 h-24 flex items-center justify-center bg-white rounded-full border-4 border-indigo-600 shadow-md">
-                        <span id="overall-percentage-text" class="text-xl font-black text-indigo-950">0%</span>
+
+                <!-- Three Sub-Tier Selectors Layout Row -->
+                <div class="flex border-b border-slate-200 dark:border-slate-800 gap-2 mb-6 text-xs font-bold">
+                    <button id="btn-sub-full" onclick="switchMockSubTab('sub-full')" class="py-2 px-4 border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400 focus:outline-none transition">Full Mocks</button>
+                    <button id="btn-sub-sectional" onclick="switchMockSubTab('sub-sectional')" class="py-2 px-4 border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 focus:outline-none transition">Sectional Tests</button>
+                    <button id="btn-sub-subject" onclick="switchMockSubTab('sub-subject')" class="py-2 px-4 border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 focus:outline-none transition">Subject-Wise Marks</button>
+                </div>
+
+                <!-- SUB-TAB A: FULL MOCKS RECORD CONSOLE -->
+                <div id="sub-full" class="mock-sub-content space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200 dark:border-slate-800 h-fit">
+                            <h3 class="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider mb-3">Add Full Mock Record</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Mock Assessment Name</label>
+                                    <input type="text" id="mock-full-name" placeholder="e.g., SBI PO Mock Test #01" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Score Obtained</label>
+                                        <input type="number" id="mock-full-score" placeholder="e.g., 68.5" step="0.01" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Total Limit</label>
+                                        <input type="number" id="mock-full-total" value="100" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                    </div>
+                                </div>
+                                <button onclick="addMockRecord('full')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded-lg text-xs transition shadow-sm">Save Full Mock</button>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 bg-slate-50 dark:bg-slate-800/40 p-4 border border-slate-200 dark:border-slate-800 rounded-xl overflow-x-auto">
+                            <h3 class="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider mb-3">Historical Full Assessment Matrix</h3>
+                            <div id="list-full-mocks" class="space-y-2 max-h-[300px] overflow-y-auto"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB-TAB B: SECTIONAL TESTS RECORD CONSOLE -->
+                <div id="sub-sectional" class="mock-sub-content hidden space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200 dark:border-slate-800 h-fit">
+                            <h3 class="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider mb-3">Log Sectional Score</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Target Subject Framework</label>
+                                    <select id="mock-sec-subject" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none">
+                                        <option value="Quantitative Aptitude">Quantitative Aptitude</option>
+                                        <option value="Reasoning & Puzzles">Reasoning & Puzzles</option>
+                                        <option value="English Language">English Language</option>
+                                        <option value="Professional Knowledge (IT Core)">Professional Knowledge (IT Core)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Test Title Identifier</label>
+                                    <input type="text" id="mock-sec-name" placeholder="e.g., Oliveboard Advanced Sectional 4" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Score</label>
+                                        <input type="number" id="mock-sec-score" step="0.01" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Out Of</label>
+                                        <input type="number" id="mock-sec-total" value="35" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                    </div>
+                                </div>
+                                <button onclick="addMockRecord('sectional')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded-lg text-xs transition shadow-sm">Save Sectional Record</button>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 bg-slate-50 dark:bg-slate-800/40 p-4 border border-slate-200 dark:border-slate-800 rounded-xl">
+                            <h3 class="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider mb-3">Sectional Execution Logs</h3>
+                            <div id="list-sectional-mocks" class="space-y-2 max-h-[300px] overflow-y-auto"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB-TAB C: SUBJECT-WISE / TOPIC TESTS RECORD CONSOLE -->
+                <div id="sub-subject" class="mock-sub-content hidden space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200 dark:border-slate-800 h-fit">
+                            <h3 class="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider mb-3">Add Subject/Topic Mark</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Syllabus Theme / Chapter Topic</label>
+                                    <input type="text" id="mock-sub-name" placeholder="e.g., Data Interpretation Caselets Run" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Marks Added</label>
+                                        <input type="number" id="mock-sub-score" step="0.01" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Total Scale</label>
+                                        <input type="number" id="mock-sub-total" value="20" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                    </div>
+                                </div>
+                                <button onclick="addMockRecord('subject')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded-lg text-xs transition shadow-sm">Save Subject Mark</button>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 bg-slate-50 dark:bg-slate-800/40 p-4 border border-slate-200 dark:border-slate-800 rounded-xl">
+                            <h3 class="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider mb-3">Topic & Component Marks Registry</h3>
+                            <div id="list-subject-mocks" class="space-y-2 max-h-[300px] overflow-y-auto"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: MASTER VELOCITY ANALYTICS -->
+            <div id="progress-tab" class="tab-content hidden">
+                <div class="border-b border-slate-200 dark:border-slate-800 pb-4 mb-6">
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100">Live Preparation Velocity Analytics</h2>
+                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Aggregated visual completion distribution across core target themes.</p>
+                </div>
+                <div class="bg-gradient-to-br from-indigo-50 to-slate-50 dark:from-indigo-950/20 dark:to-slate-900/20 border border-indigo-100 dark:border-indigo-900/50 rounded-2xl p-6 mb-8 flex flex-col sm:flex-row items-center gap-6 shadow-sm">
+                    <div class="relative w-24 h-24 flex items-center justify-center bg-white dark:bg-slate-800 rounded-full border-4 border-indigo-600 dark:border-indigo-500 shadow-md">
+                        <span id="overall-percentage-text" class="text-xl font-black text-indigo-950 dark:text-indigo-300">0%</span>
                     </div>
                     <div>
-                        <h3 class="text-lg font-bold text-slate-900 tracking-tight">Overall Mastery Milestone Completion</h3>
-                        <p class="text-xs text-slate-500 mt-1 max-w-md leading-relaxed">Computes total contextual control metrics across foundational, acceleration, and mock mode modules.</p>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Overall Mastery Milestone Completion</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md leading-relaxed">Computes total contextual control metrics across foundational, acceleration, and mock mode modules.</p>
                     </div>
                 </div>
-                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-4">Sectional Progress Metrics</h3>
+                <h3 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-4">Sectional Progress Metrics</h3>
                 <div id="sectional-progress-container" class="space-y-4">
                     <!-- Automated layout progress bar elements -->
                 </div>
             </div>
 
-            <!-- TAB 4: CALENDAR TIMELINE HISTORY SYSTEM WITH PROGRESS GRAPHS -->
+            <!-- TAB 6: CALENDAR TIMELINE HISTORY SYSTEM WITH PROGRESS GRAPHS -->
             <div id="history-tab" class="tab-content hidden">
-                <div class="border-b border-slate-200 pb-4 mb-6">
-                    <h2 class="text-xl font-bold text-slate-800">Historical Tracking Calendar</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Select a logged calendar day to check past study durations and subject distribution performance charts.</p>
+                <div class="border-b border-slate-200 dark:border-slate-800 pb-4 mb-6">
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100">Historical Tracking Calendar</h2>
+                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Select a logged calendar day to check past study durations and subject distribution performance charts.</p>
                 </div>
-                
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- Mini Left Pane Calendar Day Index Registry Node -->
-                    <div class="bg-slate-50 p-4 border border-slate-200 rounded-xl">
-                        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Logged Days Archive</h3>
+                    <!-- Mini Calendar Day Index Node -->
+                    <div class="bg-slate-50 dark:bg-slate-800/40 p-4 border border-slate-200 dark:border-slate-800 rounded-xl">
+                        <h3 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3">Logged Days Archive</h3>
                         <div id="calendar-days-log-list" class="space-y-2 max-h-[350px] overflow-y-auto">
-                            <!-- Injected dates buttons -->
-                            <p class="text-xs text-slate-400 italic">No history records locked yet. Click "Lock Day" at day's end to log metrics.</p>
+                            <p class="text-xs text-slate-400 dark:text-slate-500 italic">No history records locked yet. Click "Lock Day" at day's end to log metrics.</p>
                         </div>
                     </div>
 
-                    <!-- Dynamic Right Performance Analytics Workspace Monitor Grid Pane -->
-                    <div class="md:col-span-2 bg-slate-50/50 p-5 border border-slate-200 border-dashed rounded-xl flex flex-col justify-between">
+                    <!-- Dynamic Performance Analytics Workspace Monitor -->
+                    <div class="md:col-span-2 bg-slate-50/50 dark:bg-slate-800/20 p-5 border border-slate-200 dark:border-slate-800 border-dashed rounded-xl flex flex-col justify-between">
                         <div id="history-workspace-empty" class="text-center py-12 my-auto">
                             <span class="text-3xl">📅</span>
-                            <p class="text-xs font-medium text-slate-400 mt-2">Select any date from the log list to inspect historical data records.</p>
+                            <p class="text-xs font-medium text-slate-400 dark:text-slate-500 mt-2">Select any date from the log list to inspect historical data records.</p>
                         </div>
                         
                         <div id="history-workspace-active" class="hidden space-y-6 w-full">
-                            <div class="flex justify-between items-center border-b border-slate-200 pb-2">
-                                <h3 id="hist-display-date" class="font-extrabold text-slate-800 text-sm">Date</h3>
-                                <span id="hist-display-hours" class="bg-indigo-100 text-indigo-800 text-xs font-black px-2.5 py-0.5 rounded-md border border-indigo-200">0 Hours Done</span>
+                            <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
+                                <h3 id="hist-display-date" class="font-extrabold text-slate-800 dark:text-slate-200 text-sm">Date</h3>
+                                <span id="hist-display-hours" class="bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-300 text-xs font-black px-2.5 py-0.5 rounded-md border border-indigo-200 dark:border-indigo-900/50">0 Hours Done</span>
                             </div>
 
-                            <!-- Historical Subject Weight Distributions Progress Vector Bars Area -->
+                            <!-- Historical Subject Weight Distributions -->
                             <div>
-                                <h4 class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Subject Performance Map on Day</h4>
+                                <h4 class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Subject Performance Map on Day</h4>
                                 <div id="history-graph-bars-stack" class="space-y-2">
                                     <!-- Injected programmatic graph bars -->
                                 </div>
@@ -174,16 +365,26 @@
     </div>
 
     <script>
-        // ==========================================
-        // CONFIGURATION: SETUP CLOUD DB PARAMS
-        // ==========================================
-        const SUPABASE_URL = "https://dneewrdwwelawdafuqti.supabase.co"; 
+        // Setup Cloud DB params
+        const SUPABASE_URL = "https://dneewrdwwelawdafuqti.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuZWV3cmR3d2VsYXdkYWZ1cXRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1ODEzNjEsImV4cCI6MjA5NzE1NzM2MX0.mpqxLCBP9ocI0sNUo3PD5QY1Gv7SoVmSBGFnk9PkF3Y";
         let supabaseClient = null;
         let isReadOnlyGirlfriendView = false;
 
-        // Establish direct connection to database client
-        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Custom Task List Memory Storage
+        let customDailyTasks = [];
+
+        // Unified Object Blueprint Model for Mock Data tracking
+        let mockMarksData = {
+            full: [],
+            sectional: [],
+            subject: []
+        };
+
+        // Initialize Supabase Client Connection Safeguard
+        if(SUPABASE_URL.indexOf("YOUR_PROJECT_ID") === -1) {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
 
         // Evaluate query constraints to verify audience path identity models
         const runtimeURLParams = new URLSearchParams(window.location.search);
@@ -191,6 +392,20 @@
             isReadOnlyGirlfriendView = true;
             document.getElementById('view-mode-banner').classList.remove('hidden');
             document.getElementById('editor-controls-panel').classList.add('hidden');
+            document.getElementById('task-form-panel').classList.add('hidden');
+        }
+
+        // Core App Dark Mode Toggle Engine
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateThemeUI();
+        }
+
+        function updateThemeUI() {
+            const isDark = document.documentElement.classList.contains('dark');
+            document.getElementById('theme-toggle-icon').innerText = isDark ? '☀️' : '🌙';
+            document.getElementById('theme-toggle-text').innerText = isDark ? 'Light Mode' : 'Dark Mode';
         }
 
         // Core App Routing Controller
@@ -202,8 +417,23 @@
                 btn.classList.add('text-indigo-200', 'font-medium', 'border-transparent');
             });
             const activeBtn = document.getElementById(`btn-${tabId}`);
-            activeBtn.classList.remove('text-indigo-200', 'border-transparent', 'font-medium');
-            activeBtn.classList.add('border-white', 'text-white', 'font-bold');
+            if(activeBtn) {
+                activeBtn.classList.remove('text-indigo-200', 'border-transparent', 'font-medium');
+                activeBtn.classList.add('border-white', 'text-white', 'font-bold');
+            }
+        }
+
+        // Mock Marks Sub-Tab Layout Router
+        function switchMockSubTab(subTabId) {
+            document.querySelectorAll('.mock-sub-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(subTabId).classList.remove('hidden');
+            
+            document.querySelectorAll('[id^="btn-sub-"]').forEach(btn => {
+                btn.classList.remove('border-indigo-600', 'text-indigo-600', 'dark:text-indigo-400', 'dark:border-indigo-400');
+                btn.classList.add('border-transparent', 'text-slate-500', 'dark:text-slate-400');
+            });
+            document.getElementById(`btn-${subTabId}`).classList.remove('border-transparent', 'text-slate-500', 'dark:text-slate-400');
+            document.getElementById(`btn-${subTabId}`).classList.add('border-indigo-600', 'text-indigo-600', 'dark:text-indigo-400', 'dark:border-indigo-400');
         }
 
         function formatTimeMarker(totalMinutes) {
@@ -213,17 +443,9 @@
             return `${hourField % 12 === 0 ? 12 : hourField % 12}:${minuteField < 10 ? '0' + minuteField : minuteField} ${hourField >= 12 ? 'PM' : 'AM'}`;
         }
 
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
-        }
-
         const bankingSyllabusData = {
             "Quantitative Aptitude": [
-                { id: "qa_si_ci", name: "Simple & Compound Interest" },
+                { id: "qa_si_ci", name: "Simple & Compound Interest (Urgent priority untouched topic)" },
                 { id: "qa_num_sys", name: "Number System, Simplification & Approximations" },
                 { id: "qa_pct", name: "Percentage, Ratio & Proportion structures" },
                 { id: "qa_avg", name: "Averages & Mixtures (Alligation framework)" },
@@ -255,7 +477,7 @@
                 { id: "re_sufficiency", name: "Data Sufficiency evaluation logic rules" }
             ],
             "English Language": [
-                { id: "en_grammar", name: "Grammar Rules Crash Focus" },
+                { id: "en_grammar", name: "Grammar Rules Crash Focus (Urgent priority untouched topic)" },
                 { id: "en_error", name: "Error Detection, Extraction & Correction rules" },
                 { id: "en_rc", name: "Reading Comprehension fluency & inference analytics" },
                 { id: "en_jumbles", name: "Para-Jumbles, Para-Completion & Sentence Rearrangements" },
@@ -272,126 +494,449 @@
             ]
         };
 
-        const basicSecondaryPool = [
-            { id: "reasoning", name: "Reasoning & Puzzles Block", tag: "Reasoning", type: "core", desc: "Timed puzzle runs. Target: Floor-based & scheduling configuration drills." },
-            { id: "english", name: "English Language Mastery", tag: "English", type: "core", desc: "First 2 weeks Grammar Rules concentration focus, then Error detection sets." },
-            { id: "gaca", name: "General Awareness & Banking", tag: "GA / CA", type: "core", desc: "AffairsCloud current affairs capsule review + dynamic sectional mock checks." },
-            { id: "computer", name: "Computer Knowledge Maintenance", tag: "Computer", type: "light", desc: "30 speed run structural MCQs pulled via Adda247 quiz databanks." },
-            { id: "mock", name: "Mock Test / Sectional Evaluation", tag: "Evaluation", type: "core", desc: "PracticeMock online system simulations + rigorous mistake analysis analytics." }
+        const baseStaticFallbackPool = [
+            { id: "task_def_1", name: "Morning Warm-up + CA Headlines", tag: "Warm-Up", type: "light", desc: "AffairsCloud headlines + gentle warm stretching.", dur: 15 },
+            { id: "task_def_2", name: "Quantitative Aptitude Session", tag: "QA PEAK", type: "core", desc: "High conversion arithmetic calculation practice drills.", dur: 60 },
+            { id: "task_def_3", name: "Professional Knowledge (IT Core)", tag: "IT PEAK", type: "core", desc: "DBMS/OS conceptual acceleration sets.", dur: 60 },
+            { id: "task_def_4", name: "Breakfast / Refreshment Break", tag: "Break", type: "break", desc: "Complete separation from screens to preserve nervous energy.", dur: 30 },
+            { id: "task_def_5", name: "Reasoning & Puzzles Block", tag: "Reasoning", type: "core", desc: "Timed puzzle runs. Target: Floor-based & scheduling configuration drills.", dur: 45 },
+            { id: "task_def_6", name: "English Language Mastery", tag: "English", type: "core", desc: "First 2 weeks Grammar Rules concentration focus, then Error detection sets.", dur: 45 },
+            { id: "task_def_7", name: "Short Rest & Coffee Break", tag: "Break", type: "break", desc: "Fresh coffee collection alongside quick mental decompression break from screen fatigue.", dur: 25 }
         ];
 
-        // Core Timetable Scheduling Generation Pipeline Matrix
+        // ==========================================
+        // DYNAMIC TASKS CRUD INTERACTIVE ENGINE
+        // ==========================================
+        function initTasksDataPool() {
+            const localTasks = localStorage.getItem('custom_daily_tasks');
+            if (localTasks) {
+                customDailyTasks = JSON.parse(localTasks);
+            } else {
+                customDailyTasks = [...baseStaticFallbackPool];
+                localStorage.setItem('custom_daily_tasks', JSON.stringify(customDailyTasks));
+            }
+            renderTasksRegistryList();
+        }
+
+        function renderTasksRegistryList() {
+            const listContainer = document.getElementById('custom-tasks-registry-stack');
+            const counterText = document.getElementById('task-pool-counter');
+            if(!listContainer) return;
+
+            if(customDailyTasks.length === 0) {
+                listContainer.innerHTML = `<p class="text-xs text-slate-400 dark:text-slate-500 italic text-center py-8">No tasks available inside current registry pool. Create fresh tasks above.</p>`;
+                counterText.innerText = "0 Mins Total";
+                return;
+            }
+
+            let accumulationMinutes = 0;
+            listContainer.innerHTML = '';
+
+            customDailyTasks.forEach((task, index) => {
+                accumulationMinutes += parseInt(task.dur);
+                let classificationColor = "bg-blue-50 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-900/50";
+                if (task.type === 'break') classificationColor = "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700";
+                else if (task.type === 'light') classificationColor = "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900/50";
+
+                const buttonActionsBlock = isReadOnlyGirlfriendView ? '' : `
+                    <div class="flex items-center gap-1 sm:opacity-0 group-hover:opacity-100 transition-opacity ml-auto">
+                        <button onclick="editCustomTask('${task.id}')" class="p-1 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded border border-transparent hover:border-indigo-200 dark:hover:border-indigo-900/50 transition" title="Edit Task">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"></path></svg>
+                        </button>
+                        <button onclick="deleteCustomTask('${task.id}')" class="p-1 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded border border-transparent hover:border-rose-200 dark:hover:border-rose-900/50 transition" title="Delete Task">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </div>`;
+
+                listContainer.insertAdjacentHTML('beforeend', `
+                    <div class="group flex items-start gap-3 p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm transition hover:shadow-md">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                                <h4 class="text-xs font-bold text-slate-900 dark:text-white tracking-tight truncate">${task.name}</h4>
+                                <span class="text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded border ${classificationColor}">${task.tag} • ${task.dur}m</span>
+                            </div>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-normal line-clamp-2">${task.desc || 'No strategic description entered.'}</p>
+                        </div>
+                        ${buttonActionsBlock}
+                    </div>`);
+            });
+
+            counterText.innerText = `${accumulationMinutes} Mins Allocated`;
+        }
+
+        function saveCustomTask() {
+            if(isReadOnlyGirlfriendView) return;
+            
+            const titleInput = document.getElementById('task-title').value.trim();
+            const durationInput = parseInt(document.getElementById('task-duration').value) || 0;
+            const typeInput = document.getElementById('task-type').value;
+            const tagInput = document.getElementById('task-tag').value.trim().toUpperCase() || "FOCUS";
+            const descInput = document.getElementById('task-desc').value.trim();
+            const editId = document.getElementById('edit-task-id').value;
+
+            if(!titleInput || durationInput <= 0) {
+                alert("Please declare validation bounds: Complete Title and valid Duration configuration.");
+                return;
+            }
+
+            if(editId) {
+                const searchIdx = customDailyTasks.findIndex(t => t.id === editId);
+                if(searchIdx !== -1) {
+                    customDailyTasks[searchIdx] = { id: editId, name: titleInput, dur: durationInput, type: typeInput, tag: tagInput, desc: descInput };
+                }
+            } else {
+                const generatedUniqueId = "task_" + Date.now();
+                customDailyTasks.push({ id: generatedUniqueId, name: titleInput, dur: durationInput, type: typeInput, tag: tagInput, desc: descInput });
+            }
+
+            localStorage.setItem('custom_daily_tasks', JSON.stringify(customDailyTasks));
+            clearTaskForm();
+            renderTasksRegistryList();
+            generateSchedule();
+            pushStateToCloud();
+        }
+
+        function editCustomTask(taskId) {
+            const record = customDailyTasks.find(t => t.id === taskId);
+            if(!record) return;
+
+            document.getElementById('edit-task-id').value = record.id;
+            document.getElementById('task-title').value = record.name;
+            document.getElementById('task-duration').value = record.dur;
+            document.getElementById('task-type').value = record.type;
+            document.getElementById('task-tag').value = record.tag;
+            document.getElementById('task-desc').value = record.desc;
+
+            document.getElementById('task-form-title').innerText = "Modify Current Task";
+            document.getElementById('btn-save-task').innerText = "Update Task";
+            document.getElementById('btn-cancel-task-edit').classList.remove('hidden');
+        }
+
+        function deleteCustomTask(taskId) {
+            if(isReadOnlyGirlfriendView) return;
+            if(!confirm("Purge selected target task parameter from active loop registry?")) return;
+
+            customDailyTasks = customDailyTasks.filter(t => t.id !== taskId);
+            localStorage.setItem('custom_daily_tasks', JSON.stringify(customDailyTasks));
+            
+            renderTasksRegistryList();
+            generateSchedule();
+            pushStateToCloud();
+        }
+
+        function clearTaskForm() {
+            document.getElementById('edit-task-id').value = '';
+            document.getElementById('task-title').value = '';
+            document.getElementById('task-duration').value = '45';
+            document.getElementById('task-type').value = 'core';
+            document.getElementById('task-tag').value = '';
+            document.getElementById('task-desc').value = '';
+
+            document.getElementById('task-form-title').innerText = "Add Custom Task";
+            document.getElementById('btn-save-task').innerText = "Save Task";
+            document.getElementById('btn-cancel-task-edit').classList.add('hidden');
+        }
+
+        function getSyllabusSuggestion(taskName, taskTag) {
+            const textToTest = `${taskName} ${taskTag}`.toLowerCase();
+            let targetSubjectKey = null;
+
+            if (textToTest.includes("quant") || textToTest.includes("qa") || textToTest.includes("math")) {
+                targetSubjectKey = "Quantitative Aptitude";
+            } else if (textToTest.includes("professional") || textToTest.includes("it") || textToTest.includes("cs")) {
+                targetSubjectKey = "Professional Knowledge (IT/CS Core)";
+            } else if (textToTest.includes("reasoning") || textToTest.includes("puzzle")) {
+                targetSubjectKey = "Reasoning & Puzzles";
+            } else if (textToTest.includes("english")) {
+                targetSubjectKey = "English Language";
+            } else if (textToTest.includes("awareness") || textToTest.includes("ga") || textToTest.includes("banking")) {
+                targetSubjectKey = "General Awareness & Banking";
+            } else if (textToTest.includes("computer")) {
+                targetSubjectKey = "Computer Knowledge";
+            }
+
+            if (!targetSubjectKey || !bankingSyllabusData[targetSubjectKey]) return null;
+
+            const chapters = bankingSyllabusData[targetSubjectKey];
+            let ongoingChapter = chapters.find(ch => localStorage.getItem(ch.id) !== 'true');
+
+            if (!ongoingChapter && chapters.length > 0) {
+                return { topic: chapters[0].name + " (Review Mode)", subject: targetSubjectKey };
+            }
+            return ongoingChapter ? { topic: ongoingChapter.name, subject: targetSubjectKey } : null;
+        }
+
+        // ==========================================
+        // MOCK MARKS INTERACTIVE ENGINE SUB-MODULE
+        // ==========================================
+        function initMockMarks() {
+            const storedMocks = localStorage.getItem('banking_mock_marks');
+            if (storedMocks) {
+                mockMarksData = JSON.parse(storedMocks);
+            }
+            renderMockLists();
+        }
+
+        function addMockRecord(type) {
+            if(isReadOnlyGirlfriendView) return;
+
+            let recordObj = { id: "mock_" + Date.now(), timestamp: new Date().toLocaleDateString() };
+
+            if (type === 'full') {
+                const name = document.getElementById('mock-full-name').value.trim();
+                const score = parseFloat(document.getElementById('mock-full-score').value);
+                const total = parseFloat(document.getElementById('mock-full-total').value) || 100;
+                if (!name || isNaN(score)) return alert("Please declare valid Assessment title parameters and scoring parameters.");
+                
+                recordObj.name = name; recordObj.score = score; recordObj.total = total;
+                mockMarksData.full.push(recordObj);
+                document.getElementById('mock-full-name').value = '';
+                document.getElementById('mock-full-score').value = '';
+            } 
+            else if (type === 'sectional') {
+                const subject = document.getElementById('mock-sec-subject').value;
+                const name = document.getElementById('mock-sec-name').value.trim();
+                const score = parseFloat(document.getElementById('mock-sec-score').value);
+                const total = parseFloat(document.getElementById('mock-sec-total').value) || 35;
+                if (!name || isNaN(score)) return alert("Please specify the structural test title details.");
+                
+                recordObj.subject = subject; recordObj.name = name; recordObj.score = score; recordObj.total = total;
+                mockMarksData.sectional.push(recordObj);
+                document.getElementById('mock-sec-name').value = '';
+                document.getElementById('mock-sec-score').value = '';
+            } 
+            else if (type === 'subject') {
+                const name = document.getElementById('mock-sub-name').value.trim();
+                const score = parseFloat(document.getElementById('mock-sub-score').value);
+                const total = parseFloat(document.getElementById('mock-sub-total').value) || 20;
+                if (!name || isNaN(score)) return alert("Please fill standard topic/chapter parameters field components.");
+                
+                recordObj.name = name; recordObj.score = score; recordObj.total = total;
+                mockMarksData.subject.push(recordObj);
+                document.getElementById('mock-sub-name').value = '';
+                document.getElementById('mock-sub-score').value = '';
+            }
+
+            localStorage.setItem('banking_mock_marks', JSON.stringify(mockMarksData));
+            renderMockLists();
+            generateSchedule();
+            pushStateToCloud();
+        }
+
+        function removeMockRecord(type, id) {
+            if(isReadOnlyGirlfriendView) return;
+            if(!confirm("Permanently strip this scorecard metrics log entity out?")) return;
+
+            mockMarksData[type] = mockMarksData[type].filter(item => item.id !== id);
+            localStorage.setItem('banking_mock_marks', JSON.stringify(mockMarksData));
+            renderMockLists();
+            generateSchedule();
+            pushStateToCloud();
+        }
+
+        function renderMockLists() {
+            const deleteIconHTML = (type, id) => isReadOnlyGirlfriendView ? '' : `
+                <button onclick="removeMockRecord('${type}', '${id}')" class="text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-950/60 p-1 rounded transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>`;
+
+            // Render Full Mocks List Output
+            const fullContainer = document.getElementById('list-full-mocks');
+            if (fullContainer) {
+                if(mockMarksData.full.length === 0) {
+                    fullContainer.innerHTML = `<p class="text-xs text-slate-400 dark:text-slate-500 italic text-center py-6">No full mock matrices updated inside database.</p>`;
+                } else {
+                    fullContainer.innerHTML = mockMarksData.full.map(m => `
+                        <div class="flex items-center justify-between p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-800 dark:text-slate-200 shadow-sm">
+                            <div>
+                                <span class="block font-bold text-slate-900 dark:text-white">${m.name}</span>
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium">${m.timestamp}</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="bg-indigo-50 dark:bg-indigo-950 border border-indigo-200 dark:border-indigo-900/50 text-indigo-700 dark:text-indigo-400 px-2 py-0.5 rounded font-black">${m.score} / ${m.total}</span>
+                                ${deleteIconHTML('full', m.id)}
+                            </div>
+                        </div>`).join('');
+                }
+            }
+
+            // Render Sectional Mocks List Output
+            const sectionalContainer = document.getElementById('list-sectional-mocks');
+            if (sectionalContainer) {
+                if(mockMarksData.sectional.length === 0) {
+                    sectionalContainer.innerHTML = `<p class="text-xs text-slate-400 dark:text-slate-500 italic text-center py-6">No localized sectional markers loaded yet.</p>`;
+                } else {
+                    sectionalContainer.innerHTML = mockMarksData.sectional.map(m => `
+                        <div class="flex items-center justify-between p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-800 dark:text-slate-200 shadow-sm">
+                            <div>
+                                <span class="block font-bold text-slate-900 dark:text-white">${m.name}</span>
+                                <span class="text-[9px] uppercase tracking-wider font-extrabold text-indigo-600 dark:text-indigo-400 bg-indigo-50/60 dark:bg-indigo-950/40 px-1 rounded">${m.subject}</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-900/50 text-emerald-800 dark:text-emerald-400 px-2 py-0.5 rounded font-black">${m.score} / ${m.total}</span>
+                                ${deleteIconHTML('sectional', m.id)}
+                            </div>
+                        </div>`).join('');
+                }
+            }
+
+            // Render Subject Mocks List Output
+            const subjectContainer = document.getElementById('list-subject-mocks');
+            if (subjectContainer) {
+                if(mockMarksData.subject.length === 0) {
+                    subjectContainer.innerHTML = `<p class="text-xs text-slate-400 dark:text-slate-500 italic text-center py-6">No specific topic assessment elements configured inside registry history maps.</p>`;
+                } else {
+                    subjectContainer.innerHTML = mockMarksData.subject.map(m => `
+                        <div class="flex items-center justify-between p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-800 dark:text-slate-200 shadow-sm">
+                            <div>
+                                <span class="block font-bold text-slate-900 dark:text-white">${m.name}</span>
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium">${m.timestamp}</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-400 px-2 py-0.5 rounded font-black">${m.score} / ${m.total}</span>
+                                ${deleteIconHTML('subject', m.id)}
+                            </div>
+                        </div>`).join('');
+                }
+            }
+        }
+
+        // ==========================================
+        // REFACTORED TIMETABLE GENERATION PIPELINE
+        // ==========================================
         function generateSchedule() {
             const timeRaw = document.getElementById('startTime').value;
             const hoursSelected = parseInt(document.getElementById('planType').value);
             if (!timeRaw) return;
 
-            const [startHour, startMinutes] = timeRaw.split(':').map(Number);
-            let currentMinutes = startHour * 60 + startMinutes;
+            const [hours, minutes] = timeRaw.split(':').map(Number);
+            let currentMinutes = hours * 60 + minutes;
             const absoluteStart = currentMinutes;
+            
+            const targetedCapMinutes = hoursSelected * 60;
             let plannedBlocks = [];
+            let runtimeAccumulatedMins = 0;
 
-            // 🕒 SMART DYNAMIC TIME-AWARE BREAK GENERATION ENGINE
-            const isLateStart = startHour >= 12;
+            let stackPoolCopy = JSON.parse(localStorage.getItem('custom_daily_tasks')) || [...customDailyTasks];
 
-            const fixedWarmUp = { 
-                dur: 15, 
-                tag: isLateStart ? "KICKOFF" : "WARM-UP", 
-                name: isLateStart ? "Afternoon Activation & CA Headliners" : "Morning Warm-up + CA Headlines", 
-                type: "light", 
-                desc: isLateStart ? "Quick mid-day brain dump and speed check of live economic headlines." : "AffairsCloud headlines + gentle warm stretching." 
-            };
-            const fixedBreakfast = { 
-                dur: 30, 
-                tag: "BREAK", 
-                name: isLateStart ? "Evening Coffee & Snack Break" : "Breakfast / Refreshment Break", 
-                type: "break", 
-                desc: isLateStart ? "Disconnect from the display and grab a fresh coffee brew to preserve high focus." : "Complete separation from screens to preserve nervous energy." 
-            };
-            const fixedLunch = { 
-                dur: 45, 
-                tag: "BREAK", 
-                name: isLateStart ? "Dinner & Night-Owl Reset" : "Lunch & Mid-Day Reset", 
-                type: "break", 
-                desc: isLateStart ? "Step away completely for dinner, stretch out, and oxygenate before the final revision blocks." : "Step away completely, rehydrate, rest mind." 
-            };
-            const groomingBlock = { 
-                id: "grooming", 
-                tag: "PERSONAL", 
-                name: "Grooming Check & Coffee Top-up", 
-                type: "grooming", 
-                desc: "Quick workspace cleanup, crisp beard lining check, and refilling caffeine reserves.", 
-                dur: 25 
-            };
+            for(let i = 0; i < stackPoolCopy.length; i++) {
+                let taskElement = stackPoolCopy[i];
+                let durationVal = parseInt(taskElement.dur);
 
-            // Structure Allocations based on dynamic timing profiles
-            if (hoursSelected === 3) {
-                plannedBlocks.push(fixedWarmUp, { dur: 60, tag: "QA PEAK", name: "Quantitative Aptitude (SI & CI)", type: "core", desc: "High conversion arithmetic calculation practice drills." }, { dur: 60, tag: "IT PEAK", name: "Professional Knowledge (IT Core)", type: "core", desc: "DBMS/OS conceptual acceleration sets." });
-                let shuffled = shuffleArray([...basicSecondaryPool]); plannedBlocks.push({ ...shuffled[0], dur: 45 });
-            } else if (hoursSelected === 4) {
-                plannedBlocks.push(fixedWarmUp, { dur: 60, tag: "QA PEAK", name: "Quantitative Aptitude (SI & CI)", type: "core", desc: "High intensity arithmetic drills." }, { dur: 60, tag: "IT PEAK", name: "Professional Knowledge (IT Core)", type: "core", desc: "DBMS/OS core technical focus items." }, fixedBreakfast);
-                let shuffled = shuffleArray([...basicSecondaryPool]); plannedBlocks.push({ ...shuffled[0], dur: 45 }, { ...shuffled[1], dur: 40 });
-            } else if (hoursSelected === 5) {
-                plannedBlocks.push(fixedWarmUp, { dur: 75, tag: "QA PEAK", name: "Quantitative Aptitude (SI & CI)", type: "core", desc: "Targeted focus: Simple & Compound Interest tracking bounds." }, { dur: 75, tag: "IT PEAK", name: "Professional Knowledge (IT Core)", type: "core", desc: "Networks & Data Structures practice routines." }, fixedBreakfast);
-                let shuffled = shuffleArray([...basicSecondaryPool]); plannedBlocks.push({ ...shuffled[0], dur: 45 }, { ...shuffled[1], dur: 40 }, { ...shuffled[2], dur: 30 });
-            } else if (hoursSelected === 6) {
-                plannedBlocks.push(fixedWarmUp, { dur: 90, tag: "QA PEAK", name: "Quantitative Aptitude (Core Focus)", type: "core", desc: "30 timed arithmetic questions. Primary priority: Simple & Compound Interest." }, { dur: 90, tag: "IT PEAK", name: "Professional Knowledge (IT Officer)", type: "core", desc: "Core computer architecture & engineering topics check." }, fixedBreakfast);
-                let shuffled = shuffleArray([...basicSecondaryPool]); plannedBlocks.push({ ...shuffled[0], dur: 45 }, { ...shuffled[1], dur: 45 }, { ...shuffled[2], dur: 30 }, groomingBlock);
-            } else if (hoursSelected === 7) { 
-                plannedBlocks.push(
-                    fixedWarmUp, 
-                    { dur: 100, tag: "QA PEAK", name: "Quantitative Aptitude (SI & CI Intense Focus)", type: "core", desc: "Advanced data interpretation cases and compound interest formula mechanics." },
-                    fixedBreakfast,
-                    { dur: 100, tag: "IT PEAK", name: "Professional Knowledge (Advanced IT Officer Core)", type: "core", desc: "Deep dive debugging loops, query structural normalizations, algorithm run complexities." },
-                    fixedLunch
-                );
-                let shuffled = shuffleArray([...basicSecondaryPool]);
-                plannedBlocks.push({ ...shuffled[0], dur: 50 }, { ...shuffled[1], dur: 50 }, groomingBlock, { ...shuffled[2], dur: 35 });
-            } else if (hoursSelected === 8) { 
-                plannedBlocks.push(
-                    fixedWarmUp,
-                    { dur: 120, tag: "QA PEAK", name: "Quantitative Aptitude (Mastery Module)", type: "core", desc: "Full arithmetic test run, tracking calculation speeds on structural interest problems." },
-                    fixedBreakfast,
-                    { dur: 120, tag: "IT PEAK", name: "Professional Knowledge (Systems Architecture)", type: "core", desc: "Network routing protocol blocks, OS file structures, process control blocks." },
-                    fixedLunch
-                );
-                let shuffled = shuffleArray([...basicSecondaryPool]);
-                plannedBlocks.push({ ...shuffled[0], dur: 60 }, { ...shuffled[1], dur: 60 }, groomingBlock, { ...shuffled[2], dur: 40 });
-            } else if (hoursSelected === 9) { 
-                plannedBlocks.push(
-                    fixedWarmUp,
-                    { dur: 130, tag: "QA SURGE", name: "Quantitative Aptitude (High-Yield Speed Engine)", type: "core", desc: "Mixed arithmetic arrays, complex tabular interpretation grids, calculations speed sprint." },
-                    fixedBreakfast,
-                    { dur: 130, tag: "IT SURGE", name: "Professional Knowledge (Full Core Review)", type: "core", desc: "Comprehensive structural sweeps: software engineering models, security architectures, object loops." },
-                    fixedLunch,
-                    { dur: 75, tag: "EVALUATION", name: "Full Simulation Practice Mock Test", type: "core", desc: "Timed layout simulation checking structural exam endurance profiles." }
-                );
-                let shuffled = shuffleArray([...basicSecondaryPool]);
-                plannedBlocks.push({ ...shuffled[0], dur: 65 }, { ...shuffled[1], dur: 65 }, groomingBlock, { ...shuffled[2], dur: 45 });
+                if (runtimeAccumulatedMins + durationVal <= targetedCapMinutes) {
+                    plannedBlocks.push(taskElement);
+                    runtimeAccumulatedMins += durationVal;
+                } else {
+                    let remainingSlice = targetedCapMinutes - runtimeAccumulatedMins;
+                    if(remainingSlice >= 5) {
+                        plannedBlocks.push({
+                            ...taskElement,
+                            dur: remainingSlice,
+                            name: taskElement.name + " (Time-Capped Focus)"
+                        });
+                        runtimeAccumulatedMins += remainingSlice;
+                    }
+                    break;
+                }
+            }
+
+            if(runtimeAccumulatedMins < targetedCapMinutes) {
+                let safetyMarginMins = targetedCapMinutes - runtimeAccumulatedMins;
+                plannedBlocks.push({
+                    id: "buffer_rest",
+                    name: "Dynamic Hub Buffer & Syllabus Revision",
+                    tag: "REVISION",
+                    type: "light",
+                    desc: "Auto-generated buffer space. Perform target analysis tracking loops.",
+                    dur: safetyMarginMins
+                });
+            }
+
+            // Render Dynamic Header Pulse Widget inside Timetable Track
+            const pulseWidgetRow = document.getElementById('timetable-mock-pulse-row');
+            if (pulseWidgetRow) {
+                const totalFullCount = mockMarksData.full.length;
+                const totalSecCount = mockMarksData.sectional.length;
+                if(totalFullCount > 0 || totalSecCount > 0) {
+                    pulseWidgetRow.classList.remove('hidden');
+                    let displayHTML = `<div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2"><div><span class="text-[10px] font-black tracking-widest text-indigo-900 dark:text-indigo-400 block uppercase mb-0.5">📊 Live Testing Scorecard Pulse Summary</span><div class="flex flex-wrap gap-4 text-[11px] text-slate-600 dark:text-slate-400">`;
+                    if(totalFullCount > 0) {
+                        const topFull = mockMarksData.full[totalFullCount - 1];
+                        displayHTML += `<span>🏆 Last Full Mock: <strong class="text-slate-900 dark:text-slate-200">${topFull.name}</strong> (${topFull.score}/${topFull.total})</span>`;
+                    }
+                    if(totalSecCount > 0) {
+                        const topSec = mockMarksData.sectional[totalSecCount - 1];
+                        displayHTML += `<span>⚡ Sectional Check: <strong class="text-slate-900 dark:text-slate-200">${topSec.name}</strong> (${topSec.score}/${topSec.total})</span>`;
+                    }
+                    displayHTML += `</div></div><button onclick="switchTab('mocks-tab')" class="w-max bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-[10px] font-bold px-2 py-1 rounded transition shadow-sm">Update Marks</button></div>`;
+                    pulseWidgetRow.innerHTML = displayHTML;
+                } else {
+                    pulseWidgetRow.classList.add('hidden');
+                }
             }
 
             const timelineElement = document.getElementById('schedule-timeline-flow');
+            if(!timelineElement) return;
             timelineElement.innerHTML = ''; 
 
             plannedBlocks.forEach((activity) => {
-                const stepStart = currentMinutes; const stepEnd = currentMinutes + activity.dur; currentMinutes = stepEnd;
-                let categoryStyles = "bg-blue-50 text-blue-800 border-blue-200"; let axisIndicator = "border-blue-600 bg-white shadow-sm";
-                if (activity.type === 'break') { categoryStyles = "bg-slate-100 text-slate-600 border-slate-200"; axisIndicator = "border-slate-400 bg-slate-200"; }
-                else if (activity.type === 'light') { categoryStyles = "bg-emerald-50 text-emerald-800 border-emerald-200"; axisIndicator = "border-emerald-500 bg-emerald-50"; }
-                else if (activity.type === 'grooming') { categoryStyles = "bg-amber-100 text-amber-800 border-amber-200"; axisIndicator = "border-amber-600 bg-amber-50"; }
+                const stepStart = currentMinutes; const stepEnd = currentMinutes + parseInt(activity.dur); currentMinutes = stepEnd;
+                let categoryStyles = "bg-blue-50 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-900/50"; 
+                let axisIndicator = "border-blue-600 dark:border-blue-400 bg-white dark:bg-slate-900 shadow-sm";
+                
+                if (activity.type === 'break') { 
+                    categoryStyles = "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700"; 
+                    axisIndicator = "border-slate-400 dark:border-slate-500 bg-slate-200 dark:bg-slate-700"; 
+                }
+                else if (activity.type === 'light') { 
+                    categoryStyles = "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900/50"; 
+                    axisIndicator = "border-emerald-500 dark:border-emerald-400 bg-emerald-50 dark:bg-slate-800"; 
+                }
+
+                // Dynamic Informative Syllabus Sub-Breakdown Node
+                const suggestionMeta = getSyllabusSuggestion(activity.name, activity.tag || '');
+                let contextualSubtopicHTML = '';
+                
+                if (suggestionMeta && activity.type === 'core') {
+                    contextualSubtopicHTML = `
+                        <div class="mt-2 p-2.5 bg-indigo-50/70 dark:bg-indigo-950/20 border border-indigo-100/80 dark:border-indigo-900/30 rounded-xl text-[11px] shadow-sm">
+                            <div class="flex items-center gap-1 text-indigo-950 dark:text-indigo-300 font-black uppercase tracking-wider text-[9px] mb-1">
+                                <span>🎯 Active Blueprint Target (${suggestionMeta.subject}):</span>
+                            </div>
+                            <p class="font-bold text-slate-800 dark:text-slate-200 text-xs mb-1.5">${suggestionMeta.topic}</p>
+                            <div class="text-slate-600 dark:text-slate-400 leading-normal font-medium bg-white/80 dark:bg-slate-800/80 p-2 rounded-lg border border-slate-100 dark:border-slate-700">
+                                <span class="font-bold text-indigo-700 dark:text-indigo-400">⚡ Practice Routine:</span> Deconstruct core concepts first. Solve 20-30 practice problems under exam-simulated timers, mark down layout shortcuts, log mistakes, and check this chapter off once complete to cycle forward.
+                            </div>
+                        </div>`;
+                }
+
+                if(activity.type === 'break' || activity.name.toLowerCase().includes("break")) {
+                    contextualSubtopicHTML += `
+                        <div class="mt-1.5 p-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-[11px] text-slate-600 dark:text-slate-400">
+                            ☕ <strong>Break Protocol:</strong> Maximize screen detachment. Rest your eyes to prevent cognitive fatigue and restore processing capacity.
+                        </div>`;
+                }
+
+                const mergedMatchString = `${activity.name} ${activity.tag}`.toLowerCase();
+                if(mergedMatchString.includes("mock") || mergedMatchString.includes("test")) {
+                    contextualSubtopicHTML += `
+                        <div class="mt-1.5 p-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-xl text-[11px] text-amber-900 dark:text-amber-300 font-medium">
+                            📊 <strong>Testing Loop Activated:</strong> Once you complete this simulation run, update your marks in the <strong>Mock Marks Ledger</strong> immediately to check accuracy parameters.
+                        </div>`;
+                }
 
                 timelineElement.insertAdjacentHTML('beforeend', `
                     <div class="relative pl-6 md:pl-8 group">
                         <span class="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full border-2 ${axisIndicator} z-10"></span>
                         <div class="flex flex-col md:flex-row md:items-baseline gap-0.5 mb-1">
-                            <div class="md:absolute md:left-[-150px] md:w-32 md:text-right font-extrabold text-slate-800 text-xs tracking-tight">${formatTimeMarker(stepStart)}</div>
-                            <div class="md:absolute md:left-[-150px] md:top-4 md:w-32 md:text-right font-medium text-slate-400 text-[11px]">to ${formatTimeMarker(stepEnd)}</div>
-                            <h3 class="text-sm font-bold text-slate-900 tracking-tight leading-tight">${activity.name}</h3>
+                            <div class="md:absolute md:left-[-150px] md:w-32 md:text-right font-extrabold text-slate-800 dark:text-slate-200 text-xs tracking-tight">${formatTimeMarker(stepStart)}</div>
+                            <div class="md:absolute md:left-[-150px] md:top-4 md:w-32 md:text-right font-medium text-slate-400 dark:text-slate-500 text-[11px]">to ${formatTimeMarker(stepEnd)}</div>
+                            <h3 class="text-sm font-bold text-slate-900 dark:text-white tracking-tight leading-tight">${activity.name}</h3>
                             <span class="inline-block text-[9px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded border ${categoryStyles} w-max md:ml-3 mt-1 md:mt-0">${activity.tag} • ${activity.dur}m</span>
                         </div>
-                        <p class="text-xs text-slate-500 max-w-2xl leading-relaxed font-normal">${activity.desc}</p>
-                    </div>
-                `);
+                        <p class="text-xs text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed font-normal">${activity.desc || ''}</p>
+                        ${contextualSubtopicHTML}
+                    </div>`);
             });
             document.getElementById('total-timeline-span').innerText = `ACTIVE FOCUS WINDOW: ${formatTimeMarker(absoluteStart)} — ${formatTimeMarker(currentMinutes)}`;
             
@@ -400,27 +945,27 @@
             }
         }
 
-        // Programmatic Render Engine for Tab 2: Checklists
         function buildSyllabusInterface() {
             const container = document.getElementById('syllabus-accordion-container');
+            if(!container) return;
             container.innerHTML = '';
             Object.keys(bankingSyllabusData).forEach((subjectName, subIdx) => {
                 const chapters = bankingSyllabusData[subjectName];
                 let subjectBlockHTML = `
-                    <div class="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-                        <div class="bg-slate-200/60 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
-                            <h3 class="text-sm font-extrabold text-slate-800 tracking-tight">${subjectName}</h3>
-                            <span id="badge-count-${subIdx}" class="text-[11px] font-bold bg-white text-indigo-700 px-2 py-0.5 rounded-full border border-slate-300">0 / ${chapters.length} Done</span>
+                    <div class="bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+                        <div class="bg-slate-200/60 dark:bg-slate-800/80 px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                            <h3 class="text-sm font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">${subjectName}</h3>
+                            <span id="badge-count-${subIdx}" class="text-[11px] font-bold bg-white dark:bg-slate-700 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full border border-slate-300 dark:border-slate-600">0 / ${chapters.length} Done</span>
                         </div>
-                        <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-3 bg-white">`;
+                        <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-3 bg-white dark:bg-slate-900">`;
 
                 chapters.forEach((chapter) => {
                     const stateCheck = localStorage.getItem(chapter.id) === 'true' ? 'checked' : '';
                     const disableAttribute = isReadOnlyGirlfriendView ? 'disabled' : '';
                     subjectBlockHTML += `
-                        <label for="${chapter.id}" class="flex items-start gap-3 p-3 bg-slate-50 hover:bg-slate-100/70 border border-slate-200 rounded-lg cursor-pointer transition select-none">
-                            <input type="checkbox" id="${chapter.id}" ${stateCheck} ${disableAttribute} onchange="onChapterToggle('${chapter.id}', ${subIdx})" class="mt-0.5 w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 transition">
-                            <span class="text-xs font-semibold text-slate-700 leading-normal">${chapter.name}</span>
+                        <label for="${chapter.id}" class="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100/70 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer transition select-none">
+                            <input type="checkbox" id="${chapter.id}" ${stateCheck} ${disableAttribute} onchange="onChapterToggle('${chapter.id}', ${subIdx})" class="mt-0.5 w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-600 dark:bg-slate-700 transition">
+                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300 leading-normal">${chapter.name}</span>
                         </label>`;
                 });
                 container.insertAdjacentHTML('beforeend', subjectBlockHTML + `</div></div>`);
@@ -434,18 +979,20 @@
             localStorage.setItem(chapterId, element.checked);
             updateSubjectBadgeCount(subIdx, bankingSyllabusData[Object.keys(bankingSyllabusData)[subIdx]]);
             computeProgressMetrics();
+            generateSchedule();
             pushStateToCloud();
         }
 
         function updateSubjectBadgeCount(subIdx, chapters) {
             let completedCount = 0;
             chapters.forEach(ch => { if (localStorage.getItem(ch.id) === 'true') completedCount++; });
-            document.getElementById(`badge-count-${subIdx}`).innerText = `${completedCount} / ${chapters.length} Done`;
+            const badge = document.getElementById(`badge-count-${subIdx}`);
+            if(badge) badge.innerText = `${completedCount} / ${chapters.length} Done`;
         }
 
-        // Programmatic Render Engine for Tab 3: Performance Graphs
         function computeProgressMetrics() {
             const progressContainer = document.getElementById('sectional-progress-container');
+            if(!progressContainer) return;
             progressContainer.innerHTML = '';
             let grandTotal = 0; let grandCompleted = 0;
 
@@ -455,12 +1002,12 @@
                 const subjectPercentage = chapters.length > 0 ? Math.round((subjectCompleted / chapters.length) * 100) : 0;
 
                 progressContainer.insertAdjacentHTML('beforeend', `
-                    <div class="bg-white p-4 border border-slate-200 rounded-xl shadow-sm">
+                    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm">
                         <div class="flex justify-between items-center mb-1.5 text-xs">
-                            <span class="font-bold text-slate-800">${subjectName}</span>
-                            <span class="font-extrabold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">${subjectPercentage}%</span>
+                            <span class="font-bold text-slate-800 dark:text-slate-200">${subjectName}</span>
+                            <span class="font-extrabold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded border border-indigo-100 dark:border-indigo-900/50">${subjectPercentage}%</span>
                         </div>
-                        <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden border border-slate-200/60">
+                        <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden border border-slate-200/60 dark:border-slate-600">
                             <div class="bg-gradient-to-r from-indigo-500 to-blue-600 h-2.5 rounded-full transition-all duration-500" style="width: ${subjectPercentage}%"></div>
                         </div>
                     </div>`);
@@ -468,15 +1015,13 @@
             document.getElementById('overall-percentage-text').innerText = `${grandTotal > 0 ? Math.round((grandCompleted / grandTotal) * 100) : 0}%`;
         }
 
-        // TIMELINE HISTORY CONTROLLER
+        // ==========================================
+        // HISTORY CALENDAR MANAGEMENT LOG LOOPS
+        // ==========================================
         function commitActiveDayToHistory() {
             if(isReadOnlyGirlfriendView) return;
             const targetTodayStamp = new Date().toDateString();
-            const logHoursRaw = parseInt(document.getElementById('planType').value);
-            
-            let labelText = logHoursRaw + " Hours";
-            if(logHoursRaw === 7) labelText = "7-8 Hours";
-            if(logHoursRaw === 9) labelText = "9+ Hours";
+            const logHours = parseInt(document.getElementById('planType').value) || 4;
             
             let metricsMatrixSnapshot = {};
             Object.keys(bankingSyllabusData).forEach(subject => {
@@ -487,7 +1032,7 @@
             });
 
             let trackingHistoryLogs = JSON.parse(localStorage.getItem('study_history_logs')) || {};
-            trackingHistoryLogs[targetTodayStamp] = { hours: labelText, distribution: metricsMatrixSnapshot };
+            trackingHistoryLogs[targetTodayStamp] = { hours: logHours, distribution: metricsMatrixSnapshot };
             
             localStorage.setItem('study_history_logs', JSON.stringify(trackingHistoryLogs));
             alert(`Day locked successfully for timestamp: ${targetTodayStamp}!`);
@@ -501,15 +1046,15 @@
             const historyLogs = JSON.parse(localStorage.getItem('study_history_logs')) || {};
             const keysArray = Object.keys(historyLogs);
 
-            if(keysArray.length === 0) return;
+            if(keysArray.length === 0 || !listContainer) return;
             listContainer.innerHTML = '';
 
             keysArray.reverse().forEach(dateKey => {
                 const dayData = historyLogs[dateKey];
                 listContainer.insertAdjacentHTML('beforeend', `
-                    <button onclick="inspectHistoryDate('${dateKey}')" class="w-full text-left p-3 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-lg transition text-xs font-bold text-slate-700 flex justify-between items-center shadow-sm">
+                    <button onclick="inspectHistoryDate('${dateKey}')" class="w-full text-left p-3 bg-white dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 border border-slate-200 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-900/50 rounded-lg transition text-xs font-bold text-slate-700 dark:text-slate-300 flex justify-between items-center shadow-sm">
                         <span>📅 ${dateKey}</span>
-                        <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-black">${dayData.hours}</span>
+                        <span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded text-[10px] font-black">${dayData.hours} Hrs</span>
                     </button>`);
             });
         }
@@ -523,7 +1068,7 @@
             document.getElementById('history-workspace-active').classList.remove('hidden');
 
             document.getElementById('hist-display-date').innerText = `Data Log Entry: ${dateKey}`;
-            document.getElementById('hist-display-hours').innerText = `${selectedLog.hours} Completed`;
+            document.getElementById('hist-display-hours').innerText = `${selectedLog.hours} Hours Completed`;
 
             const barsStack = document.getElementById('history-graph-bars-stack');
             barsStack.innerHTML = '';
@@ -532,22 +1077,29 @@
                 const weightVal = selectedLog.distribution[subject];
                 barsStack.insertAdjacentHTML('beforeend', `
                     <div class="text-xs">
-                        <div class="flex justify-between text-[11px] font-medium text-slate-600 mb-0.5">
+                        <div class="flex justify-between text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-0.5">
                             <span>${subject}</span>
-                            <span class="font-bold text-indigo-600">${weightVal}%</span>
+                            <span class="font-bold text-indigo-600 dark:text-indigo-400">${weightVal}%</span>
                         </div>
-                        <div class="w-full bg-slate-200/70 rounded-full h-2 overflow-hidden">
-                            <div class="bg-indigo-600 h-2 rounded-full" style="width: ${weightVal}%"></div>
+                        <div class="w-full bg-slate-200/70 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                            <div class="bg-indigo-600 dark:bg-indigo-500 h-2 rounded-full" style="width: ${weightVal}%"></div>
                         </div>
                     </div>`);
             });
         }
 
+        // ==========================================
         // REAL-TIME SUPABASE CLOUD SYNC LOGIC ENGINE
+        // ==========================================
         async function pushStateToCloud() {
             if (!supabaseClient || isReadOnlyGirlfriendView) return;
             
-            let statePayload = { checklists: {}, history: JSON.parse(localStorage.getItem('study_history_logs')) || {} };
+            let statePayload = { 
+                checklists: {}, 
+                history: JSON.parse(localStorage.getItem('study_history_logs')) || {},
+                custom_tasks: JSON.parse(localStorage.getItem('custom_daily_tasks')) || [],
+                mock_marks: JSON.parse(localStorage.getItem('banking_mock_marks')) || { full: [], sectional: [], subject: [] }
+            };
             Object.keys(bankingSyllabusData).forEach(subj => {
                 bankingSyllabusData[subj].forEach(ch => {
                     statePayload.checklists[ch.id] = localStorage.getItem(ch.id) === 'true';
@@ -559,9 +1111,7 @@
                     .from('ayush_tracker_sync')
                     .upsert({ id: 1, dynamic_blob: statePayload, updated_at: new Date() });
                 
-                if(!error) {
-                    setSyncStatusState(true);
-                }
+                if(!error) { setSyncStatusState(true); }
             } catch(err) { console.error("Cloud write exception parameters:", err); }
         }
 
@@ -585,18 +1135,30 @@
                     if(cloudBlob.history) {
                         localStorage.setItem('study_history_logs', JSON.stringify(cloudBlob.history));
                     }
+                    if(cloudBlob.custom_tasks) {
+                        localStorage.setItem('custom_daily_tasks', JSON.stringify(cloudBlob.custom_tasks));
+                        customDailyTasks = cloudBlob.custom_tasks;
+                    }
+                    if(cloudBlob.mock_marks) {
+                        localStorage.setItem('banking_mock_marks', JSON.stringify(cloudBlob.mock_marks));
+                        mockMarksData = cloudBlob.mock_marks;
+                    }
                     
                     setSyncStatusState(true);
                     
                     buildSyllabusInterface();
                     computeProgressMetrics();
                     renderHistoryCalendarList();
+                    renderTasksRegistryList();
+                    renderMockLists();
+                    generateSchedule();
                 }
             } catch(err) { console.error("Cloud fallback fetch parameters error:", err); }
         }
 
         function setSyncStatusState(isConnected) {
             const badge = document.getElementById('sync-badge');
+            if(!badge) return;
             if(isConnected) {
                 badge.className = "bg-emerald-500/20 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full border border-emerald-500/30";
                 badge.innerText = "Cloud Synced Live";
@@ -608,13 +1170,26 @@
 
         // Bootstrap Core App Initialization Loops
         window.onload = function() {
+            // Theme initialization logic
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+            updateThemeUI();
+
             const cachedDuration = localStorage.getItem('cached_last_active_duration');
             if(cachedDuration) { document.getElementById('planType').value = cachedDuration; }
             
+            initTasksDataPool();
+            initMockMarks();
             buildSyllabusInterface();
             computeProgressMetrics();
             renderHistoryCalendarList();
             generateSchedule();
+
+            // Default route on login
+            switchTab('tasks-tab');
 
             if (supabaseClient) {
                 pullStateFromCloud();
